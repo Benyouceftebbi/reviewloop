@@ -69,15 +69,24 @@ html.lenis body {
 /*
   Section 12 — Final CTA "projector lights up the text" effect.
 
-  We register --spot-x as an animatable <percentage>, then drive a
-  radial-gradient through it. The gradient is clipped to the text via
-  background-clip: text + transparent text-fill, so the bright spot
-  actually moves *across the letters* — exactly like a projector
-  spotlight scanning the headline.
+  Two-layer technique:
 
-  Sweep keyframes are timed to the 4200ms beam-projector keyframes in
-  tailwind.config.ts so the cone beam and the lit-up portion of the
-  text stay in sync: right → left → right → soft return → locked center.
+    [base layer]  The headline rendered in a dim shadow-white, ALWAYS
+                  visible. This is the unlit text the projector hasn't
+                  reached yet.
+
+    [spot layer]  The same headline rendered absolutely on top in
+                  full bright white (with the italic in purple), but
+                  hidden behind a CSS mask. The mask is a radial
+                  gradient whose center follows --spot-x, so only the
+                  area under the spotlight is revealed — exactly like
+                  a beam illuminating the letters as it sweeps.
+
+  --spot-x is registered as an animatable <percentage> so the radial
+  mask can be transitioned smoothly. The 4200ms sweep keyframes are
+  timed to the cone-beam projector keyframes in tailwind.config.ts so
+  the visible cone in the background and the lit slice of the text
+  travel together: right → left → right → soft return → locked center.
 */
 @property --spot-x {
   syntax: "<percentage>";
@@ -85,36 +94,43 @@ html.lenis body {
   initial-value: 115%;
 }
 
-.cta-spotlit-text {
-  --spot-x: 115%;
-  background-image: radial-gradient(
-    ellipse 380px 220px at var(--spot-x) 50%,
-    rgba(255, 255, 255, 1) 0%,
-    rgba(255, 255, 255, 0.92) 18%,
-    rgba(218, 165, 255, 0.55) 38%,
-    rgba(255, 255, 255, 0.22) 62%
-  );
-  -webkit-background-clip: text;
-          background-clip: text;
-  -webkit-text-fill-color: transparent;
-          color: transparent;
-  animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+/* Base layer — dim, always visible. */
+.cta-text-base {
+  color: rgba(255, 255, 255, 0.18);
+}
+.cta-text-base em {
+  color: rgba(155, 127, 232, 0.32);
+  font-style: italic;
 }
 
-.cta-spotlit-italic {
+/* Spot layer — bright, revealed only inside the moving mask. */
+.cta-text-spot {
   --spot-x: 115%;
-  background-image: radial-gradient(
-    ellipse 280px 200px at var(--spot-x) 50%,
-    rgba(218, 165, 255, 1) 0%,
-    rgba(196, 130, 255, 0.95) 22%,
-    rgba(155, 81, 224, 0.6) 50%,
-    rgba(155, 81, 224, 0.28) 72%
+  color: #ffffff;
+  -webkit-mask-image: radial-gradient(
+    ellipse 360px 240px at var(--spot-x) 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.92) 28%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0) 80%
   );
-  -webkit-background-clip: text;
-          background-clip: text;
-  -webkit-text-fill-color: transparent;
-          color: transparent;
+          mask-image: radial-gradient(
+    ellipse 360px 240px at var(--spot-x) 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.92) 28%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  /* Soft purple glow under the lit portion. */
+  filter: drop-shadow(0 0 18px rgba(196, 130, 255, 0.45))
+          drop-shadow(0 0 42px rgba(155, 81, 224, 0.28));
   animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+.cta-text-spot em {
+  color: var(--purple-soft);
+  font-style: italic;
 }
 
 @keyframes ctaSpotlightSweep {

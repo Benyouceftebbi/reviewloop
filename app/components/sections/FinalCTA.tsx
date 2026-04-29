@@ -80,20 +80,27 @@ export default function FinalCTA() {
       <BeamLight inView={inView} settled={beamSettled} />
 
       <div className="relative mx-auto flex max-w-[960px] flex-col items-center text-center">
+        {/*
+          Two-layer headline so the projector beam can actually
+          "light up" the text as it sweeps: a dim base layer is
+          always visible, and a bright layer on top is revealed
+          only under a moving radial mask (see globals.css).
+        */}
         <h2
-          className={`font-display font-normal leading-[1.05] tracking-[-0.02em] text-[clamp(44px,7.2vw,88px)] ${
-            inView ? "cta-spotlit-text" : "text-white"
-          }`}
+          className="relative font-display font-normal leading-[1.05] tracking-[-0.02em] text-[clamp(44px,7.2vw,88px)]"
           style={reveal(0)}
         >
-          Your best{" "}
-          <em
-            className={`italic ${inView ? "cta-spotlit-italic" : ""}`}
-            style={!inView ? { color: "var(--purple-soft)" } : undefined}
-          >
-            ads
-          </em>{" "}
-          are already in your DMs.
+          <span className="cta-text-base">
+            Your best <em>ads</em> are already in your DMs.
+          </span>
+          {inView && (
+            <span
+              aria-hidden
+              className="cta-text-spot absolute inset-0"
+            >
+              Your best <em>ads</em> are already in your DMs.
+            </span>
+          )}
         </h2>
 
         <div className="mt-10 md:mt-14" style={reveal(200)}>
