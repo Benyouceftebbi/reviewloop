@@ -164,20 +164,29 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* (1) CONE — narrow at bottom-right, fans up-left */}
+      {/* (1) CONE — true projector cone with the narrow apex pinned
+          at the BOTTOM-RIGHT corner and the wide mouth fanning across
+          the top-left. Polygon vertices walked around the perimeter:
+
+            (100% 90%)   apex side A — right edge, 10% above BR
+            ( 45%  0%)   far mouth, top edge
+            (  0% 45%)   far mouth, left edge
+            ( 90% 100%)  apex side B — bottom edge, 10% left of BR
+            (100% 100%)  the apex itself (BR corner)
+
+          → small ~10%/10% wedge at BR, wide chord across TL.        */}
       <div
-        className={`absolute right-0 bottom-0 h-[160%] w-[75%] origin-bottom-right ${
+        className={`absolute inset-0 origin-bottom-right ${
           settled ? "animate-beam-sweep" : "animate-beam-projector"
         }`}
         style={{
-          // Vertical mirror of the original 200deg gradient (= 340deg)
-          // so the brightest stop sits at the bottom-right origin and
-          // fades upward toward the mouth of the cone.
+          // 315deg = gradient runs from the BR corner (0% stop, hot
+          // purple) toward the TL (transparent), so the source is
+          // brightest at the apex and dims as the cone opens up.
           background:
-            "linear-gradient(340deg, rgba(170, 100, 240, 0.6) 0%, rgba(138, 71, 217, 0.42) 22%, rgba(110, 58, 199, 0.24) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
-          // Vertical mirror of the original polygon: narrow end now
-          // sits in the bottom-right corner, wide mouth opens upward.
-          clipPath: "polygon(55% 100%, 100% 100%, 100% 78%, 8% 0%, 32% 0%)",
+            "linear-gradient(315deg, rgba(170, 100, 240, 0.65) 0%, rgba(138, 71, 217, 0.45) 22%, rgba(110, 58, 199, 0.26) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
+          clipPath:
+            "polygon(100% 90%, 45% 0%, 0% 45%, 90% 100%, 100% 100%)",
           filter: "blur(36px)",
         }}
       />
