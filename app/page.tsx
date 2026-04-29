@@ -25,6 +25,7 @@ import PricingPolished from "./components/sections/PricingPolished";
 import Pricing from "./components/sections/Pricing";
 import PricingAsymmetric from "./components/sections/PricingAsymmetric";
 import FinalCTA from "./components/sections/FinalCTA";
+import Footer from "./components/sections/Footer";
 
 export default function Home() {
   return (
@@ -80,6 +81,9 @@ export default function Home() {
         {/* Section 12 — final CTA (Variant A: The Mirror Resolution) */}
         <FinalCTA />
       </main>
+
+      {/* Page bookend — design-system-aligned footer */}
+      <Footer />
     </>
   );
 }
