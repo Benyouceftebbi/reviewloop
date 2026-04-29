@@ -65,3 +65,63 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: clip;
 }
+
+/*
+  Section 12 — Final CTA "projector lights up the text" effect.
+
+  We register --spot-x as an animatable <percentage>, then drive a
+  radial-gradient through it. The gradient is clipped to the text via
+  background-clip: text + transparent text-fill, so the bright spot
+  actually moves *across the letters* — exactly like a projector
+  spotlight scanning the headline.
+
+  Sweep keyframes are timed to the 4200ms beam-projector keyframes in
+  tailwind.config.ts so the cone beam and the lit-up portion of the
+  text stay in sync: right → left → right → soft return → locked center.
+*/
+@property --spot-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 115%;
+}
+
+.cta-spotlit-text {
+  --spot-x: 115%;
+  background-image: radial-gradient(
+    ellipse 380px 220px at var(--spot-x) 50%,
+    rgba(255, 255, 255, 1) 0%,
+    rgba(255, 255, 255, 0.92) 18%,
+    rgba(218, 165, 255, 0.55) 38%,
+    rgba(255, 255, 255, 0.22) 62%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+          color: transparent;
+  animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.cta-spotlit-italic {
+  --spot-x: 115%;
+  background-image: radial-gradient(
+    ellipse 280px 200px at var(--spot-x) 50%,
+    rgba(218, 165, 255, 1) 0%,
+    rgba(196, 130, 255, 0.95) 22%,
+    rgba(155, 81, 224, 0.6) 50%,
+    rgba(155, 81, 224, 0.28) 72%
+  );
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+          color: transparent;
+  animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes ctaSpotlightSweep {
+  0%   { --spot-x: 115%; }
+  22%  { --spot-x: -15%; }
+  44%  { --spot-x: 115%; }
+  62%  { --spot-x: 28%; }
+  78%  { --spot-x: 65%; }
+  100% { --spot-x: 50%; }
+}

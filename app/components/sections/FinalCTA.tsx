@@ -81,13 +81,16 @@ export default function FinalCTA() {
 
       <div className="relative mx-auto flex max-w-[960px] flex-col items-center text-center">
         <h2
-          className={`font-display font-normal leading-[1.05] tracking-[-0.02em] text-white text-[clamp(44px,7.2vw,88px)] ${
-            beamSettled ? "animate-text-light-up" : ""
+          className={`font-display font-normal leading-[1.05] tracking-[-0.02em] text-[clamp(44px,7.2vw,88px)] ${
+            inView ? "cta-spotlit-text" : "text-white"
           }`}
           style={reveal(0)}
         >
           Your best{" "}
-          <em className="italic" style={{ color: "var(--purple-soft)" }}>
+          <em
+            className={`italic ${inView ? "cta-spotlit-italic" : ""}`}
+            style={!inView ? { color: "var(--purple-soft)" } : undefined}
+          >
             ads
           </em>{" "}
           are already in your DMs.
