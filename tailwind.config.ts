@@ -93,6 +93,30 @@ const config: Config = {
           "0%, 100%": { boxShadow: "0 0 20px rgba(197,248,42,0.35)" },
           "50%":      { boxShadow: "0 0 36px rgba(197,248,42,0.6)" },
         },
+        // Section 12 — Diagonal purple beam.
+        // The cone-shaped spotlight from the top-right corner gently
+        // breathes: opacity rises and the cone rotates a hair so the
+        // light feels alive without becoming theatrical.
+        beamSweep: {
+          "0%, 100%": { opacity: "0.55", transform: "rotate(0deg) translateX(0)" },
+          "50%":      { opacity: "0.9",  transform: "rotate(-1.5deg) translateX(-14px)" },
+        },
+        // The brighter inner core of the beam — slower, larger drift.
+        // Pairs with beamSweep so the highlight inside the cone shifts
+        // slightly out of phase with the cone itself.
+        beamCore: {
+          "0%, 100%": { opacity: "0.55", transform: "translate(0,0) scale(1)" },
+          "50%":      { opacity: "0.95", transform: "translate(-10px, 18px) scale(1.06)" },
+        },
+        // Faint dust motes drifting through the beam — a 12s vertical
+        // drift with horizontal sway, kept low-opacity so it reads as
+        // texture, not particles.
+        beamMotes: {
+          "0%":   { transform: "translate(0, 0)",          opacity: "0" },
+          "10%":  { opacity: "0.6" },
+          "90%":  { opacity: "0.4" },
+          "100%": { transform: "translate(-40px, 220px)",  opacity: "0" },
+        },
       },
       animation: {
         marquee:      "marquee 35s linear infinite",
@@ -103,6 +127,9 @@ const config: Config = {
         "scan-sweep":  "scanSweep 800ms ease-in-out forwards",
         "caret-blink": "caretBlink 900ms steps(1) infinite",
         "cta-pulse":   "ctaPulse 3s ease-in-out infinite",
+        "beam-sweep":  "beamSweep 9s ease-in-out infinite",
+        "beam-core":   "beamCore 7s ease-in-out infinite",
+        "beam-motes":  "beamMotes 12s linear infinite",
       },
     },
   },
