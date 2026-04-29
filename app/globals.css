@@ -1,0 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Fonts are now loaded via `next/font` in app/layout.tsx — that injects
+  CSS variables (--font-sans, --font-display) into <html>, which Tailwind
+  picks up via tailwind.config.ts.
+
+  This file stays free of @import so PostCSS doesn't complain about
+  import order versus @tailwind directives.
+*/
+
+/*
+  Design system tokens from docs/landing_page_design_spec.md.
+  These are the source of truth for new sections (Insight onward).
+  Existing arounda-style components keep using their own tokens
+  defined in tailwind.config.ts — we don't touch those.
+*/
+:root {
+  --bg-base:       #0A0A0F;
+  --bg-deep:       #050507;
+  --bg-elevated:   #111118;
+
+  --purple-core:   #4F46E5;
+  --purple-deep:   #1E1B4B;
+  --purple-soft:   #8B7FE8;
+  --purple-glow:   rgba(79, 70, 229, 0.45);
+
+  --spec-lime:       #C5F82A;
+  --spec-lime-hover: #D4FF3A;
+  --lime-glow:       rgba(197, 248, 42, 0.35);
+
+  --text-primary:  #FFFFFF;
+  --text-muted:    #9CA3AF;
+  --text-dim:      #6B7280;
+
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-soft:   rgba(255, 255, 255, 0.14);
+  --pill-bg:       rgba(255, 255, 255, 0.04);
+
+  /* Spec-defined easing for reveal-on-scroll. */
+  --ease-reveal: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-ink text-white font-sans antialiased;
+}
+
+/* Lenis smooth-scroll helper classes (added by the Lenis library at runtime). */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: clip;
+}
