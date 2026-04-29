@@ -65,3 +65,100 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: clip;
 }
+
+/*
+  Section 12 — Final CTA "projector lights up the text" effect.
+
+  Two-layer technique:
+
+    [base layer]  The headline rendered in a dim shadow-white, ALWAYS
+                  visible. This is the unlit text the projector hasn't
+                  reached yet.
+
+    [spot layer]  The same headline rendered absolutely on top in
+                  full bright white (with the italic in purple), but
+                  hidden behind a CSS mask. The mask is a radial
+                  gradient whose center follows --spot-x, so only the
+                  area under the spotlight is revealed — exactly like
+                  a beam illuminating the letters as it sweeps.
+
+  --spot-x is registered as an animatable <percentage> so the radial
+  mask can be transitioned smoothly. The 4200ms sweep keyframes are
+  timed to the cone-beam projector keyframes in tailwind.config.ts so
+  the visible cone in the background and the lit slice of the text
+  travel together: right → left → right → soft return → locked center.
+*/
+@property --spot-x {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 115%;
+}
+
+/* Base layer — dim, always visible. */
+.cta-text-base {
+  color: rgba(255, 255, 255, 0.18);
+}
+.cta-text-base em {
+  color: rgba(155, 127, 232, 0.32);
+  font-style: italic;
+}
+
+/* Spot layer — bright, revealed only inside the moving mask. */
+.cta-text-spot {
+  --spot-x: 115%;
+  color: #ffffff;
+  -webkit-mask-image: radial-gradient(
+    ellipse 360px 240px at var(--spot-x) 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.92) 28%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0) 80%
+  );
+          mask-image: radial-gradient(
+    ellipse 360px 240px at var(--spot-x) 50%,
+    rgba(0, 0, 0, 1) 0%,
+    rgba(0, 0, 0, 0.92) 28%,
+    rgba(0, 0, 0, 0.4) 60%,
+    rgba(0, 0, 0, 0) 80%
+  );
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  /* Soft purple glow under the lit portion. */
+  filter: drop-shadow(0 0 18px rgba(196, 130, 255, 0.45))
+          drop-shadow(0 0 42px rgba(155, 81, 224, 0.28));
+  animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+.cta-text-spot em {
+  color: var(--purple-soft);
+  font-style: italic;
+}
+
+/*
+  Focal disc — the visible bright bloom that travels across the
+  headline area in lockstep with the text mask. It sits BEHIND the
+  text in z-order and uses the same --spot-x animation so the user
+  sees a single moving puddle of light: bright halo around the
+  letters + lit slice of letters inside it.
+*/
+.cta-beam-focus {
+  --spot-x: 115%;
+  background-image: radial-gradient(
+    ellipse 420px 200px at var(--spot-x) 50%,
+    rgba(255, 250, 255, 0.55) 0%,
+    rgba(232, 214, 255, 0.32) 22%,
+    rgba(180, 140, 240, 0.18) 50%,
+    rgba(120, 90, 200, 0.06) 72%,
+    transparent 85%
+  );
+  filter: blur(14px);
+  animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes ctaSpotlightSweep {
+  0%   { --spot-x: 115%; }
+  22%  { --spot-x: -15%; }
+  44%  { --spot-x: 115%; }
+  62%  { --spot-x: 28%; }
+  78%  { --spot-x: 65%; }
+  100% { --spot-x: 50%; }
+}

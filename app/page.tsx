@@ -25,6 +25,7 @@ import PricingPolished from "./components/sections/PricingPolished";
 import Pricing from "./components/sections/Pricing";
 import PricingAsymmetric from "./components/sections/PricingAsymmetric";
 import FinalCTA from "./components/sections/FinalCTA";
+import Footer from "./components/sections/Footer";
 
 export default function Home() {
   return (
@@ -35,32 +36,27 @@ export default function Home() {
           <HeroBackground />
           <Hero />
           <LogoStrip />
-          <Results />
+
         </div>
 
         {/* Section 2 — three variants for review */}
-        <InsightRiver />
-        <InsightReceipt />
+
         <InsightSentence />
 
         {/* Section 3 — three variants for review */}
         <HowReplay />
-        <HowMirror />
-        <HowMorph />
+
 
         {/* Section 4 — three variants for review */}
-        <DemoSlot />
-        <DemoMatrix />
+
         <DemoFeed />
 
         {/* Section 5 — three variants for review */}
-        <ShowcaseShelf />
-        <ShowcaseCinematic />
+
         <ShowcaseMoodboard />
 
         {/* Section 6 — three variants for review */}
-        <UseCasesSplit />
-        <UseCasesStacked />
+
         <UseCasesPipeline />
 
         {/* Section 7 — comparison panel */}
@@ -73,13 +69,16 @@ export default function Home() {
         <Trust />
 
         {/* Section 10 — pricing, three variants stacked for review */}
-        <PricingPolished />
+
         <Pricing />
-        <PricingAsymmetric />
+
 
         {/* Section 12 — final CTA (Variant A: The Mirror Resolution) */}
         <FinalCTA />
       </main>
+
+      {/* Page bookend — design-system-aligned footer */}
+      <Footer />
     </>
   );
 }
