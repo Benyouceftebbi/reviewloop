@@ -81,11 +81,8 @@ export default function Compare() {
       // bg now provided by the page-wide <PageBackground /> layer
       style={{ backgroundColor: "transparent" }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 -top-40 h-[700px] w-[700px] rounded-full blur-[160px]"
-        style={{ backgroundColor: "var(--purple-glow)" }}
-      />
+      {/* Per-section ambient blob removed — page-wide PageBackground
+          now provides one continuous lighting layer. */}
 
       <div className="relative mx-auto max-w-[1180px]">
         <p

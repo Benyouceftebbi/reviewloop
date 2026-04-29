@@ -62,12 +62,8 @@ export default function ResultsLog() {
       // bg now provided by the page-wide <PageBackground /> layer
       style={{ backgroundColor: "transparent" }}
     >
-      {/* Ambient purple beam (parallax-feeling, just static blur) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 top-1/4 h-[700px] w-[700px] rounded-full blur-[160px]"
-        style={{ backgroundColor: "var(--purple-glow)", opacity: 0.5 }}
-      />
+      {/* Per-section ambient beam removed — page-wide PageBackground
+          now provides one continuous lighting layer. */}
 
       <div className="relative mx-auto max-w-[1240px]">
         <p

@@ -3,17 +3,29 @@
   entire <main>, so every section sits on the same continuous canvas
   instead of each one re-painting its own dark rectangle.
 
-  Pattern: a *zigzag* of large blurred glows that alternate from the
-  left edge to the right edge as you scroll down the page. Colors
-  rotate through the brand palette (purple → indigo → blue → purple)
-  so the lighting feels like one continuous beam snaking through the
-  page rather than 11 disconnected section ambients.
+  Composition (back → front):
 
-  Mounting: dropped as the first child of <main className="relative">
-  with `absolute inset-0 -z-10`, so it covers the full document
-  height. Sections must therefore use a transparent background so
-  this layer shows through. The body keeps `bg-ink` as the deepest
-  base tone, which provides contrast where no blob is overlapping.
+    [base]   A continuous vertical gradient that drifts through the
+             brand palette so there is *never* a dark gap between
+             blobs. This is what eliminates the "section seam" that
+             the user reported — without it, regions between blob
+             positions could collapse to pure ink.
+
+    [zigzag] A column of large blurred glows that alternate L → R →
+             L → R as you scroll. Each blob's vertical extent
+             overlaps the next by ~50% (top: 0%, 8%, 16%, …) so
+             adjacent glows bleed into each other instead of leaving
+             dark bands. Colors rotate violet → indigo → blue so the
+             chromatic temperature drifts naturally down the page.
+
+    [floor]  A subtle bottom-fade to ink so the page anchors visually
+             into the footer, instead of glowing all the way to the
+             very last pixel.
+
+  Mounting: the very first child of <main className="relative isolate
+  overflow-hidden">. Sections must keep their backgroundColor
+  transparent so this layer shows through; the body's `bg-ink` is
+  the deepest base tone where nothing else lights up.
 */
 export default function PageBackground() {
   return (
@@ -21,96 +33,106 @@ export default function PageBackground() {
       aria-hidden
       className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
     >
+      {/* ---------- (base) continuous chromatic wash ---------- */}
       {/*
-        Each blob is positioned by a percentage of <main>'s total
-        height. Sides alternate: L → R → L → R → … to form the
-        zigzag. Colors rotate purple → indigo → blue so the
-        chromatic temperature drifts as the eye travels down.
+        Vertical gradient through the brand palette. Stops are placed
+        every ~12% so the color shift is gradual; alpha values are
+        modest (0.18–0.28) so individual blobs above can still pop
+        their own brighter spots on top.
+      */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(91,33,182,0.28) 0%, rgba(67,56,202,0.22) 14%, rgba(29,78,216,0.20) 28%, rgba(76,29,149,0.22) 42%, rgba(67,56,202,0.20) 56%, rgba(29,78,216,0.18) 70%, rgba(76,29,149,0.22) 84%, rgba(30,27,75,0.28) 100%)",
+        }}
+      />
 
-        Sizes are intentionally generous (700–820px) and blurs are
-        heavy (160–200px) so adjacent blobs bleed into each other,
-        masking the section seams that previously broke continuity.
+      {/* ---------- (zigzag) overlapping blob column ---------- */}
+      {/*
+        Sides alternate L → R → L … to form the zigzag. Vertical
+        spacing is 8% so blobs (≈700px / blur 180px) overlap each
+        other vertically by roughly 50%, killing the seams.
       */}
 
-      {/* 1. HERO — purple, top-left (matches the original hero source) */}
+      {/* 1. L  — violet (hero) */}
       <div
-        className="absolute h-[760px] w-[760px] rounded-full bg-violet-700/55 blur-[180px]"
-        style={{ top: "-4%", left: "-12%" }}
+        className="absolute h-[820px] w-[820px] rounded-full bg-violet-700/45 blur-[200px]"
+        style={{ top: "-6%", left: "-14%" }}
+      />
+      {/* 2. R  — indigo */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-indigo-500/45 blur-[180px]"
+        style={{ top: "2%", right: "-10%" }}
+      />
+      {/* 3. L  — blue */}
+      <div
+        className="absolute h-[780px] w-[780px] rounded-full bg-blue-700/40 blur-[190px]"
+        style={{ top: "10%", left: "-12%" }}
+      />
+      {/* 4. R  — violet */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-violet-600/40 blur-[180px]"
+        style={{ top: "18%", right: "-12%" }}
+      />
+      {/* 5. L  — indigo */}
+      <div
+        className="absolute h-[800px] w-[800px] rounded-full bg-indigo-600/40 blur-[190px]"
+        style={{ top: "26%", left: "-12%" }}
+      />
+      {/* 6. R  — blue */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-blue-600/38 blur-[180px]"
+        style={{ top: "34%", right: "-10%" }}
+      />
+      {/* 7. L  — violet */}
+      <div
+        className="absolute h-[780px] w-[780px] rounded-full bg-violet-700/40 blur-[190px]"
+        style={{ top: "42%", left: "-14%" }}
+      />
+      {/* 8. R  — indigo */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-indigo-700/40 blur-[180px]"
+        style={{ top: "50%", right: "-12%" }}
+      />
+      {/* 9. L  — blue */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-blue-700/38 blur-[180px]"
+        style={{ top: "58%", left: "-10%" }}
+      />
+      {/* 10. R — violet */}
+      <div
+        className="absolute h-[800px] w-[800px] rounded-full bg-violet-700/40 blur-[200px]"
+        style={{ top: "66%", right: "-14%" }}
+      />
+      {/* 11. L — indigo */}
+      <div
+        className="absolute h-[780px] w-[780px] rounded-full bg-indigo-600/40 blur-[190px]"
+        style={{ top: "74%", left: "-12%" }}
+      />
+      {/* 12. R — blue */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-blue-600/38 blur-[180px]"
+        style={{ top: "82%", right: "-10%" }}
+      />
+      {/* 13. L — violet */}
+      <div
+        className="absolute h-[760px] w-[760px] rounded-full bg-violet-700/40 blur-[180px]"
+        style={{ top: "90%", left: "-14%" }}
+      />
+      {/* 14. R — indigo (anchors the bottom near the final CTA) */}
+      <div
+        className="absolute h-[720px] w-[720px] rounded-full bg-indigo-700/38 blur-[170px]"
+        style={{ top: "97%", right: "-12%" }}
       />
 
-      {/* 2. mid-hero highlight — indigo, top-right (the kink that bookends the hero) */}
-      <div
-        className="absolute h-[560px] w-[560px] rounded-full bg-indigo-500/55 blur-[150px]"
-        style={{ top: "4%", right: "-8%" }}
-      />
-
-      {/* 3. logo strip → insight — blue, left */}
-      <div
-        className="absolute h-[680px] w-[680px] rounded-full bg-blue-700/45 blur-[170px]"
-        style={{ top: "13%", left: "-14%" }}
-      />
-
-      {/* 4. how-it-works — violet, right */}
-      <div
-        className="absolute h-[700px] w-[700px] rounded-full bg-violet-600/45 blur-[180px]"
-        style={{ top: "23%", right: "-12%" }}
-      />
-
-      {/* 5. demo feed — indigo, left */}
-      <div
-        className="absolute h-[720px] w-[720px] rounded-full bg-indigo-600/45 blur-[180px]"
-        style={{ top: "33%", left: "-12%" }}
-      />
-
-      {/* 6. showcase — blue, right (cooler temperature midway down) */}
-      <div
-        className="absolute h-[640px] w-[640px] rounded-full bg-blue-600/40 blur-[160px]"
-        style={{ top: "43%", right: "-10%" }}
-      />
-
-      {/* 7. use-cases — violet, left */}
-      <div
-        className="absolute h-[700px] w-[700px] rounded-full bg-violet-700/45 blur-[180px]"
-        style={{ top: "53%", left: "-14%" }}
-      />
-
-      {/* 8. compare — indigo, right */}
-      <div
-        className="absolute h-[680px] w-[680px] rounded-full bg-indigo-700/45 blur-[170px]"
-        style={{ top: "63%", right: "-12%" }}
-      />
-
-      {/* 9. results-log — blue, left */}
-      <div
-        className="absolute h-[660px] w-[660px] rounded-full bg-blue-700/40 blur-[160px]"
-        style={{ top: "72%", left: "-10%" }}
-      />
-
-      {/* 10. trust + pricing — violet, right */}
-      <div
-        className="absolute h-[720px] w-[720px] rounded-full bg-violet-700/45 blur-[180px]"
-        style={{ top: "81%", right: "-14%" }}
-      />
-
-      {/* 11. final CTA — indigo, left (warms back up before the projector) */}
-      <div
-        className="absolute h-[680px] w-[680px] rounded-full bg-indigo-600/45 blur-[170px]"
-        style={{ top: "90%", left: "-12%" }}
-      />
-
-      {/* 12. footer — deep blue, right (anchors the page bottom) */}
-      <div
-        className="absolute h-[640px] w-[640px] rounded-full bg-blue-800/45 blur-[160px]"
-        style={{ top: "97%", right: "-10%" }}
-      />
-
+      {/* ---------- (floor) bottom-fade to ink ---------- */}
       {/*
-        Vertical fade — keeps the very bottom slightly deeper than
-        the rest, so the footer area reads as the page's resting
-        ground. Same trick the old HeroBackground used at hero scale,
-        now applied at page scale.
+        Eases the final 12% of the page down toward the body's
+        `bg-ink`, so the footer reads as the page's resting ground
+        and the last blob doesn't appear to "float" off the bottom.
       */}
-      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-ink/40" />
+      <div className="absolute inset-x-0 bottom-0 h-[12%] bg-gradient-to-b from-transparent to-ink/70" />
     </div>
   );
 }
