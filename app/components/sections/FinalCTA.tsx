@@ -14,19 +14,29 @@
 
   Animations:
    - Reveal-on-scroll fade-up at 700ms, staggered 0 / 200 / 380ms.
-   - The beam itself is alive: a slow 9s opacity+rotation sweep on the
-     cone shape, a 7s out-of-phase drift on its bright inner core, and
-     a row of low-opacity dust motes drifting downward through the
-     light at 12s intervals. Reads as a living spotlight, not a static
-     gradient.
+   - PROJECTOR INTRO (4.2s, runs once when the section enters view):
+       1. Lamp turns on far right (off-axis).
+       2. Cone sweeps right → left across the canvas.
+       3. Cone sweeps left → right.
+       4. Cone settles centered, locked on the headline.
+       At the moment of lock-in the headline "lights up" with a soft
+       purple text-glow (textLightUp keyframe), and the ambient
+       breathing animations (beam-sweep / beam-core) take over so the
+       light keeps living gently after the intro.
    - The CTA pill keeps its 3s lime-glow micro-pulse.
 */
 
 import { useEffect, useRef, useState } from "react";
 
+// Must match the projector animation duration in tailwind.config.ts
+// (`beamProjector` / `beamProjectorCore` = 4200ms). When this elapses
+// we swap the cone from the one-shot intro to the gentle breathing.
+const PROJECTOR_DURATION_MS = 4200;
+
 export default function FinalCTA() {
   const ref = useRef<HTMLElement>(null);
   const [inView, setInView] = useState(false);
+  const [beamSettled, setBeamSettled] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
@@ -44,6 +54,15 @@ export default function FinalCTA() {
     return () => obs.disconnect();
   }, []);
 
+  // Once the section reveals, schedule the moment the projector
+  // sweep finishes — that's when the headline lights up and the
+  // beam transitions into its ambient breathing loop.
+  useEffect(() => {
+    if (!inView) return;
+    const t = setTimeout(() => setBeamSettled(true), PROJECTOR_DURATION_MS);
+    return () => clearTimeout(t);
+  }, [inView]);
+
   // Shared reveal style — opacity fade + 12px translateY, 700ms.
   const reveal = (delay: number) => ({
     opacity: inView ? 1 : 0,
@@ -58,11 +77,13 @@ export default function FinalCTA() {
       className="relative overflow-hidden px-6 py-28 md:py-[180px]"
       style={{ backgroundColor: "var(--bg-base)" }}
     >
-      <BeamLight />
+      <BeamLight inView={inView} settled={beamSettled} />
 
       <div className="relative mx-auto flex max-w-[960px] flex-col items-center text-center">
         <h2
-          className="font-display font-normal leading-[1.05] tracking-[-0.02em] text-white text-[clamp(44px,7.2vw,88px)]"
+          className={`font-display font-normal leading-[1.05] tracking-[-0.02em] text-white text-[clamp(44px,7.2vw,88px)] ${
+            beamSettled ? "animate-text-light-up" : ""
+          }`}
           style={reveal(0)}
         >
           Your best{" "}
@@ -93,67 +114,93 @@ export default function FinalCTA() {
 
 /* ---------- Beam light ---------- */
 /*
-  Three layered elements compose the diagonal spotlight from the
-  top-right corner:
+  The diagonal spotlight is composed of:
 
-   1. CONE — a clip-path polygon filled with a vertical purple
-      gradient, rotated ~6deg, blurred ~36px. This is the visible
-      shape of the light. animate-beam-sweep gives it a slow
-      breathing rotation + opacity drift.
+   1. CONE — clip-path polygon filled with a vertical purple gradient,
+      blurred. While the section enters view it runs the one-shot
+      `beam-projector` keyframe (sweep R→L→R→settle). Once settled it
+      switches to the `beam-sweep` ambient breathing.
 
-   2. CORE — a tall rotated radial-gradient ellipse anchored near
-      the top-right. It's the bright lavender highlight inside the
-      cone. animate-beam-core drifts it slightly out of phase with
-      the cone above so the highlight appears to move within the
-      light.
+   2. CORE — a tall rotated radial-gradient ellipse anchored near the
+      top-right corner. Same dual-state animation as the cone but with
+      its own keyframe so the highlight tracks the cone with slightly
+      different excursion.
 
-   3. MOTES — three tiny low-opacity circles seeded at different
-      positions and animation delays, drifting downward along the
-      beam axis. They give the light texture without performing.
+   3. MOTES — three tiny low-opacity circles drifting downward along
+      the beam axis. Hidden during the projector intro (the lamp is
+      "warming up"); they fade in only once the beam has settled.
 
-   Plus two ambient blurred blobs at the corner for color depth,
-   and a subtle full-section vignette at the bottom-left to keep
-   the headline area readable.
+   Plus two ambient blurred blobs at the corner for color depth, and
+   a subtle full-section vignette at the bottom-left to keep the
+   headline area readable on the dark side.
 */
-function BeamLight() {
+function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
+  // While the section is offscreen the beam is fully hidden so that
+  // when it scrolls in, the projector intro plays from a true cold
+  // start — no half-faded sweep mid-scroll.
+  if (!inView) {
+    return (
+      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden" />
+    );
+  }
+
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* (1) CONE — clip-path polygon, slow sweep */}
+      {/* (1) CONE — projector sweep first, then ambient breathing */}
       <div
-        className="absolute right-0 top-0 h-[160%] w-[75%] origin-top-right animate-beam-sweep"
+        className={`absolute right-0 top-0 h-[160%] w-[75%] origin-top-right ${
+          settled ? "animate-beam-sweep" : "animate-beam-projector"
+        }`}
         style={{
           background:
-            "linear-gradient(200deg, rgba(170, 100, 240, 0.55) 0%, rgba(138, 71, 217, 0.40) 22%, rgba(110, 58, 199, 0.22) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
+            "linear-gradient(200deg, rgba(170, 100, 240, 0.6) 0%, rgba(138, 71, 217, 0.42) 22%, rgba(110, 58, 199, 0.24) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
           clipPath: "polygon(55% 0, 100% 0, 100% 22%, 8% 100%, 32% 100%)",
           filter: "blur(36px)",
         }}
       />
 
-      {/* (2) CORE — bright inner highlight, drifts out of phase */}
+      {/* (2) CORE — bright inner highlight, same intro then drift */}
       <div
-        className="absolute -top-24 right-[-6%] h-[760px] w-[440px] rotate-[28deg] animate-beam-core"
+        className={`absolute -top-24 right-[-6%] h-[760px] w-[440px] origin-top-right ${
+          settled ? "animate-beam-core" : "animate-beam-projector-core"
+        }`}
         style={{
           background:
-            "radial-gradient(ellipse at top, rgba(196, 130, 255, 0.85), rgba(138, 71, 217, 0.45) 35%, rgba(79, 70, 229, 0.15) 60%, transparent 78%)",
+            "radial-gradient(ellipse at top, rgba(196, 130, 255, 0.88), rgba(138, 71, 217, 0.48) 35%, rgba(79, 70, 229, 0.16) 60%, transparent 78%)",
           filter: "blur(56px)",
+          // Default rotation matches the settled state of the projector
+          // keyframe (rotate(28deg)) so the swap is seamless.
+          transform: settled ? "rotate(28deg)" : undefined,
         }}
       />
 
       {/* Ambient corner glow blobs for color depth */}
       <div
         className="absolute -right-28 -top-28 h-[520px] w-[520px] rounded-full blur-[120px]"
-        style={{ backgroundColor: "rgba(155, 81, 224, 0.42)" }}
+        style={{
+          backgroundColor: "rgba(155, 81, 224, 0.42)",
+          opacity: settled ? 1 : 0.55,
+          transition: "opacity 800ms ease-out",
+        }}
       />
       <div
         className="absolute right-[10%] top-[28%] h-[360px] w-[360px] rounded-full blur-[110px]"
-        style={{ backgroundColor: "rgba(79, 70, 229, 0.22)" }}
+        style={{
+          backgroundColor: "rgba(79, 70, 229, 0.22)",
+          opacity: settled ? 1 : 0.4,
+          transition: "opacity 800ms ease-out",
+        }}
       />
 
-      {/* (3) MOTES — three drifting particles along the beam axis */}
-      <Mote top="6%"  right="18%" delay="0s"   size={4} opacity={0.45} />
-      <Mote top="3%"  right="32%" delay="3.4s" size={3} opacity={0.35} />
-      <Mote top="10%" right="9%"  delay="6.8s" size={5} opacity={0.5}  />
-      <Mote top="2%"  right="24%" delay="9.2s" size={2} opacity={0.4}  />
+      {/* (3) MOTES — only appear once the beam has settled */}
+      {settled && (
+        <>
+          <Mote top="6%"  right="18%" delay="0s"   size={4} opacity={0.45} />
+          <Mote top="3%"  right="32%" delay="3.4s" size={3} opacity={0.35} />
+          <Mote top="10%" right="9%"  delay="6.8s" size={5} opacity={0.5}  />
+          <Mote top="2%"  right="24%" delay="9.2s" size={2} opacity={0.4}  />
+        </>
+      )}
 
       {/* Bottom-left vignette to keep headline crisp on dark side */}
       <div

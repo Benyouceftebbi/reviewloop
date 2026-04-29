@@ -117,6 +117,40 @@ const config: Config = {
           "90%":  { opacity: "0.4" },
           "100%": { transform: "translate(-40px, 220px)",  opacity: "0" },
         },
+        // Section 12 — Projector intro for the cone.
+        // Origin top-right. Positive rotation pushes the bottom of
+        // the cone toward the right edge; negative rotation pushes
+        // it toward the left. Sequence: lamp turns on far-right →
+        // sweeps left → sweeps right → returns and locks centered.
+        beamProjector: {
+          "0%":   { transform: "rotate(18deg) translateX(20px)", opacity: "0" },
+          "6%":   { opacity: "0.95" },
+          "22%":  { transform: "rotate(-22deg) translateX(-30px)", opacity: "1" },
+          "44%":  { transform: "rotate(20deg) translateX(22px)",   opacity: "1" },
+          "62%":  { transform: "rotate(-10deg) translateX(-12px)", opacity: "0.95" },
+          "78%":  { transform: "rotate(4deg) translateX(4px)",     opacity: "0.9" },
+          "100%": { transform: "rotate(0deg) translateX(0)",       opacity: "0.85" },
+        },
+        // Same projector sequence for the bright inner core, with
+        // slightly tighter excursion so the highlight tracks the
+        // cone but doesn't overshoot it.
+        beamProjectorCore: {
+          "0%":   { transform: "rotate(40deg) translate(30px, 0)",   opacity: "0" },
+          "6%":   { opacity: "0.9" },
+          "22%":  { transform: "rotate(-2deg) translate(-40px, 8px)", opacity: "1" },
+          "44%":  { transform: "rotate(38deg) translate(28px, 0)",    opacity: "1" },
+          "62%":  { transform: "rotate(20deg) translate(-8px, 12px)", opacity: "0.95" },
+          "78%":  { transform: "rotate(30deg) translate(2px, 8px)",   opacity: "0.9" },
+          "100%": { transform: "rotate(28deg) translate(0, 0)",       opacity: "0.85" },
+        },
+        // The headline "lights up" as the beam locks into place:
+        // a soft purple glow rises behind the text and a slight
+        // brightness lift. Used as a one-shot when beamSettled.
+        textLightUp: {
+          "0%":   { textShadow: "0 0 0 rgba(196,130,255,0)",   filter: "brightness(0.92)" },
+          "60%":  { textShadow: "0 0 32px rgba(196,130,255,0.55), 0 0 80px rgba(155,81,224,0.35)", filter: "brightness(1.08)" },
+          "100%": { textShadow: "0 0 18px rgba(196,130,255,0.32), 0 0 48px rgba(155,81,224,0.18)", filter: "brightness(1)" },
+        },
       },
       animation: {
         marquee:      "marquee 35s linear infinite",
@@ -130,6 +164,11 @@ const config: Config = {
         "beam-sweep":  "beamSweep 9s ease-in-out infinite",
         "beam-core":   "beamCore 7s ease-in-out infinite",
         "beam-motes":  "beamMotes 12s linear infinite",
+        // One-shot projector intro: 4.2s sweep R→L→R→settle, holds final state.
+        "beam-projector":      "beamProjector 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards",
+        "beam-projector-core": "beamProjectorCore 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards",
+        // 900ms one-shot text glow when the beam locks in.
+        "text-light-up":       "textLightUp 900ms ease-out forwards",
       },
     },
   },
