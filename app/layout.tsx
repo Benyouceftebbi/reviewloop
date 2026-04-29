@@ -28,8 +28,9 @@ const libreBaskerville = Libre_Baskerville({
 });
 
 export const metadata: Metadata = {
-  title: "Arounda Clone — Learning Build",
-  description: "Pixel-perfect learning clone of arounda.agency",
+  title: "ReviewLoop — Turn your reviews, comments & DMs into Meta-ready ads",
+  description:
+    "ReviewLoop pulls the testimonials sitting in your reviews, comments, and DMs and ships them as scroll-stopping Meta ad creatives — in minutes, not weeks.",
 };
 
 export default function RootLayout({

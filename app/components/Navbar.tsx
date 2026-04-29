@@ -50,7 +50,7 @@ export default function Navbar() {
       <div className="absolute inset-0 bg-black/30 backdrop-blur-md" aria-hidden />
 
       <div className="relative mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-4 md:px-10 md:py-5">
-        <a href="#" className="text-2xl font-medium tracking-tight">arounda</a>
+        <a href="#" className="text-2xl font-medium tracking-tight">reviewloop</a>
 
         {/* DESKTOP NAV — visible md and up */}
         <ul className="hidden items-center gap-10 text-body-m md:flex">

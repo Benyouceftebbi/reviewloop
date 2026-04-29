@@ -103,7 +103,7 @@ export default function Footer() {
               href="#"
               className="inline-flex items-baseline gap-1 font-display text-[34px] leading-none tracking-tight text-white"
             >
-              <span>arounda</span>
+              <span>reviewloop</span>
               <span
                 className="italic"
                 style={{ color: "var(--purple-soft)" }}
@@ -163,7 +163,7 @@ export default function Footer() {
               className="font-mono text-[11px] uppercase"
               style={{ color: "var(--text-dim)", letterSpacing: "0.12em" }}
             >
-              {`// `}© 2026 arounda. All rights reserved.
+              {`// `}© 2026 reviewloop. All rights reserved.
             </p>
             <StatusPill />
           </div>
@@ -179,7 +179,7 @@ export default function Footer() {
             <SocialIcon label="GitHub" href="#">
               <GitHubIcon />
             </SocialIcon>
-            <SocialIcon label="Email us" href="mailto:hi@arounda.app">
+            <SocialIcon label="Email us" href="mailto:hi@reviewloop.app">
               <MailIcon />
             </SocialIcon>
           </div>
