@@ -90,7 +90,18 @@ export default function FinalCTA() {
           className="relative font-display font-normal leading-[1.05] tracking-[-0.02em] text-[clamp(44px,7.2vw,88px)]"
           style={reveal(0)}
         >
-          <span className="cta-text-base">
+          {/* Focal disc — a soft white bloom that rides the SAME
+              --spot-x animation as the text mask below. Sitting in
+              the headline's own coordinate system means the bright
+              halo and the lit slice of letters move as one object,
+              which sells the "projector hitting the text" illusion. */}
+          {inView && (
+            <span
+              aria-hidden
+              className="cta-beam-focus pointer-events-none absolute -inset-x-12 -inset-y-8 -z-0"
+            />
+          )}
+          <span className="relative cta-text-base">
             Your best <em>ads</em> are already in your DMs.
           </span>
           {inView && (
@@ -180,11 +191,13 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
           settled ? "animate-beam-sweep" : "animate-beam-projector"
         }`}
         style={{
-          // 315deg = gradient runs from the BR corner (0% stop, hot
-          // purple) toward the TL (transparent), so the source is
-          // brightest at the apex and dims as the cone opens up.
+          // 315deg = gradient runs from the BR apex (brightest stop)
+          // toward the TL (transparent). White-led palette with a
+          // soft purple tint at the edges, so the beam itself reads
+          // as a stage projector rather than a violet wash; the
+          // surrounding ambient blobs (below) carry the purple mood.
           background:
-            "linear-gradient(315deg, rgba(170, 100, 240, 0.65) 0%, rgba(138, 71, 217, 0.45) 22%, rgba(110, 58, 199, 0.26) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
+            "linear-gradient(315deg, rgba(255, 252, 255, 0.92) 0%, rgba(238, 224, 255, 0.62) 18%, rgba(210, 180, 255, 0.38) 38%, rgba(155, 110, 230, 0.18) 62%, transparent 88%)",
           clipPath:
             "polygon(100% 90%, 45% 0%, 0% 45%, 90% 100%, 100% 100%)",
           filter: "blur(36px)",
@@ -197,10 +210,11 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
           settled ? "animate-beam-core" : "animate-beam-projector-core"
         }`}
         style={{
-          // Focus moved from "at top" → "at bottom" so the radial
-          // brightness peaks at the bottom-right corner origin.
+          // Whiter focal point at the BR corner, fading out through a
+          // light-purple halo. This is what reads as the projector's
+          // hot bulb.
           background:
-            "radial-gradient(ellipse at bottom, rgba(196, 130, 255, 0.88), rgba(138, 71, 217, 0.48) 35%, rgba(79, 70, 229, 0.16) 60%, transparent 78%)",
+            "radial-gradient(ellipse at bottom, rgba(255, 250, 255, 0.98), rgba(232, 214, 255, 0.7) 28%, rgba(180, 140, 240, 0.36) 52%, rgba(110, 80, 200, 0.14) 70%, transparent 82%)",
           filter: "blur(56px)",
           // Default rotation matches the settled state of the projector
           // keyframe (rotate(28deg)) so the swap is seamless.

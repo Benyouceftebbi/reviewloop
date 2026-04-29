@@ -133,6 +133,27 @@ html.lenis body {
   font-style: italic;
 }
 
+/*
+  Focal disc — the visible bright bloom that travels across the
+  headline area in lockstep with the text mask. It sits BEHIND the
+  text in z-order and uses the same --spot-x animation so the user
+  sees a single moving puddle of light: bright halo around the
+  letters + lit slice of letters inside it.
+*/
+.cta-beam-focus {
+  --spot-x: 115%;
+  background-image: radial-gradient(
+    ellipse 420px 200px at var(--spot-x) 50%,
+    rgba(255, 250, 255, 0.55) 0%,
+    rgba(232, 214, 255, 0.32) 22%,
+    rgba(180, 140, 240, 0.18) 50%,
+    rgba(120, 90, 200, 0.06) 72%,
+    transparent 85%
+  );
+  filter: blur(14px);
+  animation: ctaSpotlightSweep 4200ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
 @keyframes ctaSpotlightSweep {
   0%   { --spot-x: 115%; }
   22%  { --spot-x: -15%; }
