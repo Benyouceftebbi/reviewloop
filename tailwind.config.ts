@@ -103,19 +103,23 @@ const config: Config = {
         },
         // The brighter inner core of the beam — slower, larger drift.
         // Pairs with beamSweep so the highlight inside the cone shifts
-        // slightly out of phase with the cone itself.
+        // slightly out of phase with the cone itself. Anchored at the
+        // bottom-right corner so positive Y would push the core down
+        // off-screen; we drift upward instead so it floats further
+        // into view as it breathes.
         beamCore: {
           "0%, 100%": { opacity: "0.55", transform: "translate(0,0) scale(1)" },
-          "50%":      { opacity: "0.95", transform: "translate(-10px, 18px) scale(1.06)" },
+          "50%":      { opacity: "0.95", transform: "translate(-10px, -18px) scale(1.06)" },
         },
-        // Faint dust motes drifting through the beam — a 12s vertical
-        // drift with horizontal sway, kept low-opacity so it reads as
-        // texture, not particles.
+        // Faint dust motes rising through the beam — a 12s upward
+        // drift with horizontal sway. Beam now originates at the
+        // bottom-right corner, so motes ascend toward the wide end
+        // of the cone (top-left) instead of falling.
         beamMotes: {
-          "0%":   { transform: "translate(0, 0)",          opacity: "0" },
+          "0%":   { transform: "translate(0, 0)",           opacity: "0" },
           "10%":  { opacity: "0.6" },
           "90%":  { opacity: "0.4" },
-          "100%": { transform: "translate(-40px, 220px)",  opacity: "0" },
+          "100%": { transform: "translate(-40px, -220px)",  opacity: "0" },
         },
         // Section 12 — Projector intro for the cone.
         // Origin top-right. Positive rotation pushes the bottom of
@@ -133,15 +137,18 @@ const config: Config = {
         },
         // Same projector sequence for the bright inner core, with
         // slightly tighter excursion so the highlight tracks the
-        // cone but doesn't overshoot it.
+        // cone but doesn't overshoot it. With the bottom-right
+        // anchor, mid-sweep Y offsets are negated so the highlight
+        // drifts upward (into the section) instead of pushing further
+        // off the bottom edge.
         beamProjectorCore: {
-          "0%":   { transform: "rotate(40deg) translate(30px, 0)",   opacity: "0" },
+          "0%":   { transform: "rotate(40deg) translate(30px, 0)",     opacity: "0" },
           "6%":   { opacity: "0.9" },
-          "22%":  { transform: "rotate(-2deg) translate(-40px, 8px)", opacity: "1" },
-          "44%":  { transform: "rotate(38deg) translate(28px, 0)",    opacity: "1" },
-          "62%":  { transform: "rotate(20deg) translate(-8px, 12px)", opacity: "0.95" },
-          "78%":  { transform: "rotate(30deg) translate(2px, 8px)",   opacity: "0.9" },
-          "100%": { transform: "rotate(28deg) translate(0, 0)",       opacity: "0.85" },
+          "22%":  { transform: "rotate(-2deg) translate(-40px, -8px)", opacity: "1" },
+          "44%":  { transform: "rotate(38deg) translate(28px, 0)",     opacity: "1" },
+          "62%":  { transform: "rotate(20deg) translate(-8px, -12px)", opacity: "0.95" },
+          "78%":  { transform: "rotate(30deg) translate(2px, -8px)",   opacity: "0.9" },
+          "100%": { transform: "rotate(28deg) translate(0, 0)",        opacity: "0.85" },
         },
         // The headline "lights up" as the beam locks into place:
         // a soft purple glow rises behind the text and a slight

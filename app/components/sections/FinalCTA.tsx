@@ -124,25 +124,33 @@ export default function FinalCTA() {
 
 /* ---------- Beam light ---------- */
 /*
-  The diagonal spotlight is composed of:
+  The diagonal spotlight is now anchored at the BOTTOM-RIGHT corner,
+  fanning up-and-to-the-left across the headline like a stage
+  projector aimed up from below.
 
-   1. CONE — clip-path polygon filled with a vertical purple gradient,
-      blurred. While the section enters view it runs the one-shot
-      `beam-projector` keyframe (sweep R→L→R→settle). Once settled it
-      switches to the `beam-sweep` ambient breathing.
+  Composition:
+
+   1. CONE — clip-path polygon (mirrored vertically from the original
+      top-right design) filled with a purple gradient whose brightest
+      stop sits at the bottom-right origin and dims toward the wide
+      top-left mouth of the cone. While the section enters view it
+      runs the one-shot `beam-projector` keyframe (R→L→R→settle).
+      Once settled it switches to the `beam-sweep` ambient breathing.
 
    2. CORE — a tall rotated radial-gradient ellipse anchored near the
-      top-right corner. Same dual-state animation as the cone but with
-      its own keyframe so the highlight tracks the cone with slightly
-      different excursion.
+      bottom-right corner. The radial focus is moved to the BOTTOM of
+      the ellipse so the highlight ignites at the corner. Same dual-
+      state animation as the cone with its own slightly out-of-phase
+      excursion.
 
-   3. MOTES — three tiny low-opacity circles drifting downward along
-      the beam axis. Hidden during the projector intro (the lamp is
-      "warming up"); they fade in only once the beam has settled.
+   3. MOTES — tiny dust particles RISING through the beam from the
+      light source upward into the wide end (matches the new
+      bottom-up direction of the `beamMotes` keyframe).
 
-   Plus two ambient blurred blobs at the corner for color depth, and
-   a subtle full-section vignette at the bottom-left to keep the
-   headline area readable on the dark side.
+   Plus two ambient blurred blobs at the bottom-right corner for
+   color depth, and a subtle vignette at the OPPOSITE corner
+   (top-left) to deepen the dark side and keep the headline edge
+   crisp against the now-bright bottom of the canvas.
 */
 function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
   // While the section is offscreen the beam is fully hidden so that
@@ -156,27 +164,34 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
 
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-      {/* (1) CONE — projector sweep first, then ambient breathing */}
+      {/* (1) CONE — narrow at bottom-right, fans up-left */}
       <div
-        className={`absolute right-0 top-0 h-[160%] w-[75%] origin-top-right ${
+        className={`absolute right-0 bottom-0 h-[160%] w-[75%] origin-bottom-right ${
           settled ? "animate-beam-sweep" : "animate-beam-projector"
         }`}
         style={{
+          // Vertical mirror of the original 200deg gradient (= 340deg)
+          // so the brightest stop sits at the bottom-right origin and
+          // fades upward toward the mouth of the cone.
           background:
-            "linear-gradient(200deg, rgba(170, 100, 240, 0.6) 0%, rgba(138, 71, 217, 0.42) 22%, rgba(110, 58, 199, 0.24) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
-          clipPath: "polygon(55% 0, 100% 0, 100% 22%, 8% 100%, 32% 100%)",
+            "linear-gradient(340deg, rgba(170, 100, 240, 0.6) 0%, rgba(138, 71, 217, 0.42) 22%, rgba(110, 58, 199, 0.24) 45%, rgba(79, 70, 229, 0.08) 70%, transparent 88%)",
+          // Vertical mirror of the original polygon: narrow end now
+          // sits in the bottom-right corner, wide mouth opens upward.
+          clipPath: "polygon(55% 100%, 100% 100%, 100% 78%, 8% 0%, 32% 0%)",
           filter: "blur(36px)",
         }}
       />
 
-      {/* (2) CORE — bright inner highlight, same intro then drift */}
+      {/* (2) CORE — bright inner highlight, anchored at the bottom-right */}
       <div
-        className={`absolute -top-24 right-[-6%] h-[760px] w-[440px] origin-top-right ${
+        className={`absolute -bottom-24 right-[-6%] h-[760px] w-[440px] origin-bottom-right ${
           settled ? "animate-beam-core" : "animate-beam-projector-core"
         }`}
         style={{
+          // Focus moved from "at top" → "at bottom" so the radial
+          // brightness peaks at the bottom-right corner origin.
           background:
-            "radial-gradient(ellipse at top, rgba(196, 130, 255, 0.88), rgba(138, 71, 217, 0.48) 35%, rgba(79, 70, 229, 0.16) 60%, transparent 78%)",
+            "radial-gradient(ellipse at bottom, rgba(196, 130, 255, 0.88), rgba(138, 71, 217, 0.48) 35%, rgba(79, 70, 229, 0.16) 60%, transparent 78%)",
           filter: "blur(56px)",
           // Default rotation matches the settled state of the projector
           // keyframe (rotate(28deg)) so the swap is seamless.
@@ -184,9 +199,9 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
         }}
       />
 
-      {/* Ambient corner glow blobs for color depth */}
+      {/* Ambient corner glow blobs at the bottom-right for color depth */}
       <div
-        className="absolute -right-28 -top-28 h-[520px] w-[520px] rounded-full blur-[120px]"
+        className="absolute -right-28 -bottom-28 h-[520px] w-[520px] rounded-full blur-[120px]"
         style={{
           backgroundColor: "rgba(155, 81, 224, 0.42)",
           opacity: settled ? 1 : 0.55,
@@ -194,7 +209,7 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
         }}
       />
       <div
-        className="absolute right-[10%] top-[28%] h-[360px] w-[360px] rounded-full blur-[110px]"
+        className="absolute right-[10%] bottom-[28%] h-[360px] w-[360px] rounded-full blur-[110px]"
         style={{
           backgroundColor: "rgba(79, 70, 229, 0.22)",
           opacity: settled ? 1 : 0.4,
@@ -202,22 +217,23 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
         }}
       />
 
-      {/* (3) MOTES — only appear once the beam has settled */}
+      {/* (3) MOTES — rise through the beam after it settles */}
       {settled && (
         <>
-          <Mote top="6%"  right="18%" delay="0s"   size={4} opacity={0.45} />
-          <Mote top="3%"  right="32%" delay="3.4s" size={3} opacity={0.35} />
-          <Mote top="10%" right="9%"  delay="6.8s" size={5} opacity={0.5}  />
-          <Mote top="2%"  right="24%" delay="9.2s" size={2} opacity={0.4}  />
+          <Mote bottom="6%"  right="18%" delay="0s"   size={4} opacity={0.45} />
+          <Mote bottom="3%"  right="32%" delay="3.4s" size={3} opacity={0.35} />
+          <Mote bottom="10%" right="9%"  delay="6.8s" size={5} opacity={0.5}  />
+          <Mote bottom="2%"  right="24%" delay="9.2s" size={2} opacity={0.4}  />
         </>
       )}
 
-      {/* Bottom-left vignette to keep headline crisp on dark side */}
+      {/* Top-left vignette — opposite the new beam corner — to keep
+          the headline edge crisp against the brightening lower-right. */}
       <div
         className="absolute inset-0"
         style={{
           background:
-            "radial-gradient(ellipse 80% 60% at 0% 100%, rgba(0,0,0,0.55), transparent 55%)",
+            "radial-gradient(ellipse 80% 60% at 0% 0%, rgba(0,0,0,0.55), transparent 55%)",
         }}
       />
     </div>
@@ -226,13 +242,13 @@ function BeamLight({ inView, settled }: { inView: boolean; settled: boolean }) {
 
 /* A single drifting dust mote inside the beam. */
 function Mote({
-  top,
+  bottom,
   right,
   delay,
   size,
   opacity,
 }: {
-  top: string;
+  bottom: string;
   right: string;
   delay: string;
   size: number;
@@ -242,7 +258,7 @@ function Mote({
     <span
       className="absolute block rounded-full animate-beam-motes"
       style={{
-        top,
+        bottom,
         right,
         width: size,
         height: size,
