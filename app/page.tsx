@@ -1,5 +1,5 @@
 import Navbar from "./components/Navbar";
-import HeroBackground from "./components/HeroBackground";
+import PageBackground from "./components/PageBackground";
 import Hero from "./components/sections/Hero";
 import LogoStrip from "./components/sections/LogoStrip";
 import Results from "./components/sections/Results";
@@ -31,13 +31,22 @@ export default function Home() {
   return (
     <>
       <Navbar />
-      <main className="relative">
-        <div className="relative isolate overflow-hidden">
-          <HeroBackground />
-          <Hero />
-          <LogoStrip />
+      {/*
+        `relative isolate` so PageBackground can position itself with
+        `absolute inset-0` covering the entire <main>. `overflow-hidden`
+        clips the side-bleed of the zigzag glow blobs so they don't
+        cause horizontal scroll on small viewports.
+      */}
+      <main className="relative isolate overflow-hidden">
+        {/*
+          Single page-wide ambient lighting layer. Replaces the old
+          per-section purple blobs and the old hero-only background,
+          so every section sees the same zigzagging beam.
+        */}
+        <PageBackground />
 
-        </div>
+        <Hero />
+        <LogoStrip />
 
         {/* Section 2 — three variants for review */}
 

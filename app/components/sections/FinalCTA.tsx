@@ -75,7 +75,8 @@ export default function FinalCTA() {
       ref={ref}
       id="get-started"
       className="relative overflow-hidden px-6 py-28 md:py-[180px]"
-      style={{ backgroundColor: "var(--bg-base)" }}
+      // bg now provided by the page-wide <PageBackground /> layer
+      style={{ backgroundColor: "transparent" }}
     >
       <BeamLight inView={inView} settled={beamSettled} />
 

@@ -81,7 +81,8 @@ export default function InsightSentence() {
     <section
       ref={ref}
       className="relative"
-      style={{ backgroundColor: "var(--bg-base)", minHeight: "200vh" }}
+      // bg now provided by the page-wide <PageBackground /> layer
+      style={{ backgroundColor: "transparent", minHeight: "200vh" }}
     >
       <div
         aria-hidden

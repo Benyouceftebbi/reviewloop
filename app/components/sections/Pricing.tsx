@@ -113,7 +113,8 @@ export default function Pricing() {
     <section
       ref={ref}
       className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px]"
-      style={{ backgroundColor: "var(--bg-base)" }}
+      // bg now provided by the page-wide <PageBackground /> layer
+      style={{ backgroundColor: "transparent" }}
     >
       <div
         aria-hidden

@@ -43,7 +43,8 @@ export default function ShowcaseMoodboard() {
   return (
     <section
       className="relative overflow-hidden py-24 md:py-[140px]"
-      style={{ backgroundColor: "var(--bg-base)" }}
+      // bg now provided by the page-wide <PageBackground /> layer
+      style={{ backgroundColor: "transparent" }}
     >
       <div
         aria-hidden

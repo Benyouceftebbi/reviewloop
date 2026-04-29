@@ -49,7 +49,8 @@ export default function Trust() {
       id="on-record"
       className="relative px-6 py-14 md:px-20 md:py-16"
       style={{
-        backgroundColor: "var(--bg-deep)",
+        // bg now provided by the page-wide <PageBackground /> layer
+        backgroundColor: "transparent",
         opacity: inView ? 1 : 0,
         transition: "opacity 300ms var(--ease-reveal)",
       }}
