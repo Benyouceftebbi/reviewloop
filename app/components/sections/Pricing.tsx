@@ -66,7 +66,7 @@ const TIERS: Tier[] = [
       "Quota soft-caps — overages never auto-bill",
       "Cancel anytime",
     ],
-    ctaLabel: "Start free first",
+    ctaLabel: "Get 10 free creatives",
     ctaStyle: "outline",
   },
   {
@@ -81,7 +81,7 @@ const TIERS: Tier[] = [
       "Counts as 1 creative = 1 hook + sized assets",
       "Email support · cancel anytime",
     ],
-    ctaLabel: "Start free first",
+    ctaLabel: "Get 10 free creatives",
     ctaStyle: "filled",
     recommended: true,
   },
@@ -262,8 +262,14 @@ function FreeHero({ inView }: { inView: boolean }) {
 
         {/* CTA cluster on the right (stacks below on mobile). */}
         <div className="flex flex-col items-stretch gap-3 md:items-end">
+          {/*
+            PRIMARY CTA — single shared label across the site
+            ("Get 10 free creatives" → #get-started). The free
+            panel was previously labelled "Start free", which set
+            up an inconsistent voice with the hero/navbar/final CTA.
+          */}
           <a
-            href="#"
+            href="#get-started"
             className="inline-flex items-center justify-center gap-3 rounded-full px-8 py-5 text-base font-medium transition-transform duration-300 hover:scale-[1.02] md:text-lg"
             style={{
               backgroundColor: "var(--spec-lime)",
@@ -272,7 +278,7 @@ function FreeHero({ inView }: { inView: boolean }) {
               whiteSpace: "nowrap",
             }}
           >
-            Start free
+            Get 10 free creatives
             <span aria-hidden>→</span>
           </a>
           <p
@@ -393,10 +399,14 @@ function CtaButton({
   children: React.ReactNode;
   style: CtaStyle;
 }) {
+  // filled & outline are both the unified primary CTA
+  // ("Get 10 free creatives" → #get-started). Only ghost is a
+  // genuinely different intent (sales conversation), so it keeps
+  // its own label and stays out of the free-trial flow.
   if (style === "filled") {
     return (
       <a
-        href="#"
+        href="#get-started"
         className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 font-medium transition-transform duration-300 hover:scale-[1.02]"
         style={{
           backgroundColor: "var(--spec-lime)",
@@ -412,7 +422,7 @@ function CtaButton({
   if (style === "outline") {
     return (
       <a
-        href="#"
+        href="#get-started"
         className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 font-medium transition-colors duration-300"
         style={{
           color: "var(--spec-lime)",
@@ -425,7 +435,7 @@ function CtaButton({
       </a>
     );
   }
-  // ghost
+  // ghost — sales conversation only, distinct intent.
   return (
     <a
       href="#"

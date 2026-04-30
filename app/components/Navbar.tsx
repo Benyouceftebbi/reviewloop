@@ -130,11 +130,18 @@ export default function Navbar() {
   );
 }
 
-/* ---------- Sign in pill (desktop + mobile) ---------- */
+/* ---------- Primary CTA pill (desktop + mobile) ---------- */
 /*
-  Same lime-fill hover trick as the previous Contact Us pill.
-  An absolute lime <span> sits inside the pill at scaleX(0) + origin-left,
-  then scales to 1 on group-hover, sweeping across left → right.
+  The single primary CTA used everywhere on the site:
+  "Get 10 free creatives" → #get-started.
+
+  Same lime-fill hover trick as before — an absolute lime <span>
+  sits inside the pill at scaleX(0) + origin-left, then scales to 1
+  on group-hover, sweeping across left → right.
+
+  Compact mode trims the long label down to "Get 10 free" so the
+  navbar stays single-row on small viewports without forcing a
+  separate component. The full label always renders on md+.
 */
 function SignInPill({
   onClick,
@@ -152,7 +159,8 @@ function SignInPill({
         className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-lime transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:scale-x-100"
       />
       <span className="relative z-10 text-sm font-medium md:text-base">
-        Sign in
+        <span className="md:hidden">Get 10 free</span>
+        <span className="hidden md:inline">Get 10 free creatives</span>
       </span>
       <span className="relative z-10 grid h-7 w-7 place-items-center rounded-full bg-canvas text-white md:h-8 md:w-8">
         <ArrowUpRight />
@@ -199,7 +207,8 @@ function MobilePanel({
           ))}
         </ul>
 
-        {/* Sign in CTA at the bottom of the panel. */}
+        {/* Primary CTA at the bottom of the panel — same label as
+            every other primary action on the site. */}
         <div className="border-t border-canvas/8 p-4">
           <a
             href="#get-started"
@@ -209,7 +218,7 @@ function MobilePanel({
             }}
             className="flex items-center justify-between rounded-pill bg-canvas px-5 py-3 text-white transition-colors hover:bg-lime hover:text-canvas"
           >
-            <span className="font-medium">Sign in</span>
+            <span className="font-medium">Get 10 free creatives</span>
             <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-canvas">
               <ArrowUpRight />
             </span>
