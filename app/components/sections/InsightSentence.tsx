@@ -81,13 +81,15 @@ export default function InsightSentence() {
     <section
       ref={ref}
       className="relative"
-      style={{ backgroundColor: "var(--bg-base)", minHeight: "200vh" }}
+      // 130vh = the sticky inner pins for ~30vh of scroll. That's
+      // enough for the word-by-word lighting animation to land
+      // without leaving the user in a dead-air zone after the
+      // animation completes. Was 200vh; trimmed to remove the empty
+      // gap between this section and Section 3.
+      style={{ minHeight: "130vh" }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 -top-40 h-[700px] w-[700px] rounded-full blur-[160px]"
-        style={{ backgroundColor: "var(--purple-glow)" }}
-      />
+      {/* No section bg / no per-section glow — the page-level
+          PageBackground covers atmospheric lighting for this zone. */}
 
       <div className="sticky top-0 flex h-screen items-center justify-center overflow-hidden px-6 md:px-20">
         {/* Ghosts — sit behind the sentence, dim, drifting. */}

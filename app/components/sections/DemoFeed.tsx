@@ -97,13 +97,8 @@ export default function DemoFeed() {
     <section
       ref={ref}
       className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px]"
-      style={{ backgroundColor: "var(--bg-base)" }}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 -top-40 h-[700px] w-[700px] rounded-full blur-[160px]"
-        style={{ backgroundColor: "var(--purple-glow)" }}
-      />
+      {/* Atmospheric lighting comes from the page-level PageBackground. */}
 
       <div className="relative mx-auto max-w-[1180px]">
         <p

@@ -59,14 +59,8 @@ export default function ResultsLog() {
       ref={ref}
       id="early-results"
       className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px]"
-      style={{ backgroundColor: "var(--bg-base)" }}
     >
-      {/* Ambient purple beam (parallax-feeling, just static blur) */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -left-40 top-1/4 h-[700px] w-[700px] rounded-full blur-[160px]"
-        style={{ backgroundColor: "var(--purple-glow)", opacity: 0.5 }}
-      />
+      {/* Atmospheric lighting comes from the page-level PageBackground. */}
 
       <div className="relative mx-auto max-w-[1240px]">
         <p
