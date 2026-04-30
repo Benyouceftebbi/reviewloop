@@ -27,6 +27,11 @@ export default function SmoothScroll() {
       smoothWheel: true,
     });
 
+    // Expose the Lenis instance globally so other components (e.g. the
+    // Navbar) can call lenis.scrollTo() for in-page anchor links and
+    // keep the page's smooth-scroll feel consistent with mouse/touch.
+    (window as unknown as { __lenis?: Lenis }).__lenis = lenis;
+
     // Pipe Lenis's scroll into ScrollTrigger so the two libraries agree on position.
     lenis.on("scroll", ScrollTrigger.update);
 
@@ -36,6 +41,7 @@ export default function SmoothScroll() {
 
     return () => {
       lenis.destroy();
+      delete (window as unknown as { __lenis?: Lenis }).__lenis;
     };
   }, []);
 

@@ -19,7 +19,8 @@ const QUOTE = "this serum literally changed my skin in 2 weeks";
 export default function UseCasesPipeline() {
   return (
     <section
-      className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px]"
+      id="use-cases"
+      className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px] scroll-mt-24"
     >
       {/* Atmospheric lighting comes from the page-level PageBackground. */}
 

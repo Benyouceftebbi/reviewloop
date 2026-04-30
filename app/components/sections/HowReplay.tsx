@@ -95,7 +95,8 @@ export default function HowReplay() {
   return (
     <section
       ref={ref}
-      className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px]"
+      id="how-it-works"
+      className="relative overflow-hidden px-6 py-24 md:px-20 md:py-[140px] scroll-mt-24"
     >
       {/* Atmospheric lighting comes from the page-level PageBackground. */}
 

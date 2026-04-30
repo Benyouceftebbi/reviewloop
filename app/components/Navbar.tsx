@@ -46,6 +46,31 @@ export default function Navbar() {
   // to an anchor doesn't leave the panel open over the destination).
   const closeMobile = () => setMobileOpen(false);
 
+  // Intercept in-page anchor clicks and route them through Lenis so
+  // the scroll feel matches the rest of the page (which uses Lenis
+  // for smooth wheel/touch scrolling). Falls back to native anchor
+  // behavior if Lenis hasn't initialized for any reason.
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    if (!href.startsWith("#")) return;
+    const target =
+      href === "#"
+        ? document.body
+        : document.querySelector<HTMLElement>(href);
+    if (!target) return;
+
+    const lenis = (window as unknown as { __lenis?: { scrollTo: (t: HTMLElement | number, o?: { offset?: number; duration?: number }) => void } }).__lenis;
+    if (!lenis) return; // let the browser handle it natively
+
+    e.preventDefault();
+    // Offset by the fixed nav height so the section heading isn't
+    // tucked underneath the frosted-glass bar after scrolling.
+    lenis.scrollTo(target, { offset: -80, duration: 1.2 });
+    closeMobile();
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       {/* Frosted-glass background layer. */}
@@ -55,7 +80,11 @@ export default function Navbar() {
       />
 
       <div className="relative mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-4 md:px-10 md:py-5">
-        <a href="#" className="text-2xl font-medium tracking-tight">
+        <a
+          href="#"
+          onClick={(e) => handleNavClick(e, "#")}
+          className="text-2xl font-medium tracking-tight"
+        >
           reviewloop
         </a>
 
@@ -65,6 +94,7 @@ export default function Navbar() {
             <li key={link.href}>
               <a
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="transition hover:text-muted"
               >
                 {link.label}
@@ -92,6 +122,7 @@ export default function Navbar() {
       <MobilePanel
         isOpen={mobileOpen}
         onLinkTap={closeMobile}
+        onNavClick={handleNavClick}
       />
     </header>
   );
@@ -128,9 +159,11 @@ function SignInPill() {
 function MobilePanel({
   isOpen,
   onLinkTap,
+  onNavClick,
 }: {
   isOpen: boolean;
   onLinkTap: () => void;
+  onNavClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
 }) {
   return (
     <div
@@ -147,7 +180,10 @@ function MobilePanel({
             <li key={link.href}>
               <a
                 href={link.href}
-                onClick={onLinkTap}
+                onClick={(e) => {
+                  onNavClick(e, link.href);
+                  onLinkTap();
+                }}
                 className="block px-6 py-5 text-xl font-medium transition hover:bg-canvas/5"
               >
                 {link.label}
