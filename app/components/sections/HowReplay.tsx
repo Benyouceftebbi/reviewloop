@@ -249,7 +249,102 @@ export default function HowReplay() {
             creative
           </p>
         </div>
+
+        {/*
+          THREE-STEP STRIP — the cinematic above shows ONE creative.
+          This explicitly names the workflow boundaries so the reader
+          knows what the product asks of them and what it gives back.
+
+          Each step lists:
+           - INPUT  — what comes in
+           - OUTPUT — what comes out
+           - CONTROL — what you keep your hand on
+        */}
+        <div className="mt-24 grid grid-cols-1 gap-5 md:mt-28 md:grid-cols-3 md:gap-6">
+          <Step
+            n="01"
+            title="Connect sources"
+            input="Meta · Shopify · Trustpilot"
+            output="Reviews, comments, DMs auto-pulled daily"
+            control="OAuth only — disconnect anytime"
+          />
+          <Step
+            n="02"
+            title="Pick the comments"
+            input="Filter by sentiment, keyword, product"
+            output="Multiple hooks · captions · 1:1, 4:5, 9:16"
+            control="One click per creative — no prompts"
+          />
+          <Step
+            n="03"
+            title="Export or auto-post"
+            input="Approve in queue, or set & forget"
+            output="Download as Meta-ready assets, or auto-post to IG/FB"
+            control="You approve before posting (optional)"
+          />
+        </div>
       </div>
     </section>
+  );
+}
+
+/*
+  Step — one card in the 3-step workflow strip. Three labelled
+  rows (input / output / control) so each automation boundary is
+  spelled out instead of left implied. Numbers are large italic
+  serif to keep the visual rhythm of the rest of the section.
+*/
+function Step({
+  n,
+  title,
+  input,
+  output,
+  control,
+}: {
+  n: string;
+  title: string;
+  input: string;
+  output: string;
+  control: string;
+}) {
+  return (
+    <div
+      className="relative overflow-hidden rounded-2xl p-6 md:p-7"
+      style={{
+        backgroundColor: "var(--bg-elevated)",
+        border: "1px solid var(--border-subtle)",
+      }}
+    >
+      <div className="flex items-baseline gap-3">
+        <span
+          className="font-display italic font-normal leading-none"
+          style={{ color: "var(--purple-soft)", fontSize: "clamp(36px,3.6vw,52px)" }}
+        >
+          {n}
+        </span>
+        <h3 className="text-lg font-medium tracking-tight text-white md:text-xl">
+          {title}
+        </h3>
+      </div>
+      <dl className="mt-5 space-y-3 text-sm">
+        <StepRow label="Input" value={input} />
+        <StepRow label="Output" value={output} />
+        <StepRow label="Control" value={control} />
+      </dl>
+    </div>
+  );
+}
+
+function StepRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-baseline gap-3">
+      <dt
+        className="w-[68px] shrink-0 font-mono text-[10px] uppercase tracking-[0.18em]"
+        style={{ color: "var(--text-dim)" }}
+      >
+        {label}
+      </dt>
+      <dd style={{ color: "var(--text-muted)" }}>{value}</dd>
+    </div>
   );
 }

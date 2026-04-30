@@ -35,22 +35,31 @@ const LOGOS = [
 export default function LogoStrip() {
   return (
     <section
-      aria-label="Trusted by"
-      // No bg-ink here — the parent HeroBlock provides the gradient that
-      // continues from the hero into this strip. The horizontal mask still
-      // softens left/right edges of the marquee.
-      className="relative overflow-hidden py-12 [mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]"
+      aria-label="Used by teams at"
+      className="relative overflow-hidden py-12"
     >
+      {/*
+        Explicit label — without it the row reads as decoration. The
+        brief asks for a clear "Used by teams at" caption so the user
+        knows what the logos represent.
+      */}
+      <p className="mb-6 text-center font-mono text-[10px] uppercase tracking-[0.32em] text-muted">
+        {"// "}Used by teams at
+      </p>
+
       {/*
         The track. `w-max` makes it as wide as its content (so the logos
         keep their natural spacing). `whitespace-nowrap` prevents any
-        accidental wrapping mid-scroll.
+        accidental wrapping mid-scroll. The horizontal mask softens
+        left/right edges of the marquee.
       */}
-      <div className="flex w-max animate-marquee gap-20 whitespace-nowrap pr-20 hover:[animation-play-state:paused]">
-        {/* Render the logos twice for the seamless loop. */}
-        {[...LOGOS, ...LOGOS].map((logo, i) => (
-          <Logo key={i} text={logo} />
-        ))}
+      <div className="[mask-image:linear-gradient(to_right,transparent,black_8%,black_92%,transparent)]">
+        <div className="flex w-max animate-marquee gap-20 whitespace-nowrap pr-20 hover:[animation-play-state:paused]">
+          {/* Render the logos twice for the seamless loop. */}
+          {[...LOGOS, ...LOGOS].map((logo, i) => (
+            <Logo key={i} text={logo} />
+          ))}
+        </div>
       </div>
     </section>
   );

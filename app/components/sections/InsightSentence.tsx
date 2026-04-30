@@ -155,13 +155,38 @@ export default function InsightSentence() {
           })}
         </h2>
 
-        {/* Tiny caption at bottom — mono fine print. */}
-        <p
-          className="absolute bottom-10 left-1/2 -translate-x-1/2 font-mono text-xs"
-          style={{ color: "var(--text-dim)" }}
-        >
-          // scroll
-        </p>
+        {/*
+          GROUNDING BLOCK — the bold line above is the punch; this
+          immediately gives it specific, non-hype context. A short
+          "For" line names the audience, three scannable pains
+          mirror the product, and a closing line connects the
+          problem to the promised output.
+        */}
+        <div className="absolute bottom-12 left-1/2 z-10 -translate-x-1/2 text-center md:bottom-14">
+          <p
+            className="mb-4 font-mono text-[11px] uppercase tracking-[0.28em]"
+            style={{ color: "var(--text-dim)" }}
+          >
+            {"// "}For DTC teams running Meta ads &amp; posting IG/FB
+          </p>
+          <ul
+            className="mb-3 flex flex-wrap items-center justify-center gap-x-5 gap-y-1.5 font-mono text-[11px]"
+            style={{ color: "var(--text-dim)" }}
+          >
+            <li>creative takes weeks</li>
+            <li aria-hidden>·</li>
+            <li>voice gets polished away</li>
+            <li aria-hidden>·</li>
+            <li>hard to stay on-brand across formats</li>
+          </ul>
+          <p
+            className="mx-auto max-w-[640px] text-balance text-sm leading-relaxed md:text-base"
+            style={{ color: "var(--text-muted)" }}
+          >
+            You already have the best copy in your comments — you just
+            can&apos;t ship it fast enough.
+          </p>
+        </div>
       </div>
     </section>
   );

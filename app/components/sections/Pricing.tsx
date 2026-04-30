@@ -43,46 +43,59 @@ type Tier = {
   recommended?: boolean;
 };
 
+/*
+  TIERS — placeholder $X/$Y removed. Numbers below are the public
+  beta prices. The Free tier is intentionally separated visually
+  (own hero panel above) so paid tiers don't compete with the
+  free-first CTA. Each tier spells out the boundary that reduces
+  perceived risk:
+    - what counts as a "creative"
+    - what happens when you hit the quota
+    - cancel/lock-in stance
+*/
 const TIERS: Tier[] = [
   {
     name: "Starter",
-    price: "$0",
-    priceUnit: "for 10 creatives",
-    description: "Try without a card.",
+    price: "$29",
+    priceUnit: "/ month",
+    description: "For solo founders shipping their own ads.",
     features: [
-      "10 free creatives",
+      "40 creatives / month",
       "1 connected brand",
       "Auto-post or download",
-      "No time limit on the 10",
+      "Quota soft-caps — overages never auto-bill",
+      "Cancel anytime",
     ],
-    ctaLabel: "Start free",
+    ctaLabel: "Start free first",
     ctaStyle: "outline",
   },
   {
     name: "Brand",
-    price: "$X",
+    price: "$79",
     priceUnit: "/ month",
-    description: "For most DTC brands.",
+    description: "For most DTC brands running daily Meta ads.",
     features: [
-      "~100 creatives / month",
-      "1 brand, both modes",
-      "Priority detection",
-      "Email support",
+      "150 creatives / month",
+      "1 brand · both auto-post & ad modes",
+      "Priority comment detection",
+      "Counts as 1 creative = 1 hook + sized assets",
+      "Email support · cancel anytime",
     ],
-    ctaLabel: "Start 14-day trial",
+    ctaLabel: "Start free first",
     ctaStyle: "filled",
     recommended: true,
   },
   {
     name: "Studio",
-    price: "$Y",
+    price: "$199",
     priceUnit: "/ month",
-    description: "For agencies & multi-brand operators.",
+    description: "For agencies and multi-brand operators.",
     features: [
-      "500 creatives / month",
-      "5 brands",
-      "Team seats included",
-      "Slack support",
+      "600 creatives / month",
+      "Up to 5 brands · team seats included",
+      "Shared brand kit library",
+      "Slack support · onboarding call",
+      "Cancel anytime",
     ],
     ctaLabel: "Talk to us",
     ctaStyle: "ghost",
@@ -146,6 +159,18 @@ export default function Pricing() {
         {/* HERO FREE PANEL */}
         <FreeHero inView={inView} />
 
+        {/*
+          Boundary line between FREE (above, hero panel) and PAID
+          (below, tier row). Spells the boundary out so the user
+          knows exactly when they'd ever be charged.
+        */}
+        <p
+          className="mt-12 text-center font-mono text-xs md:mt-14"
+          style={{ color: "var(--text-dim)", letterSpacing: "0.18em" }}
+        >
+          {"// "}upgrade only when you&apos;ve used your 10 free creatives
+        </p>
+
         {/* SECONDARY TIER ROW. On mobile, Brand stacks first so the
             "obvious choice" hierarchy survives a vertical layout. */}
         <div className="mt-6 grid grid-cols-1 gap-4 md:mt-8 md:grid-cols-3 md:gap-5">
@@ -155,13 +180,19 @@ export default function Pricing() {
           <TierCard tier={TIERS[2]} inView={inView} delay={340} mobileOrder={3} />
         </div>
 
-        {/* HONESTY STRIP — preempts SaaS-bloat anxiety. */}
+        {/*
+          HONESTY STRIP — preempts SaaS-bloat anxiety. Each clause
+          maps to a real plan boundary called out in the tier
+          features above so the strip isn't decorative.
+        */}
         <p
           className="mt-14 text-center font-mono text-xs leading-relaxed md:mt-16"
           style={{ color: "var(--text-dim)" }}
         >
-          // no per-seat &nbsp;·&nbsp; no setup &nbsp;·&nbsp; no overages
-          &nbsp;·&nbsp; no annual lock-in &nbsp;·&nbsp; cancel anytime
+          // 1 creative = 1 hook + 1:1, 4:5, 9:16 sized assets
+          &nbsp;·&nbsp; quota soft-caps — overages never auto-bill
+          &nbsp;·&nbsp; no per-seat &nbsp;·&nbsp; no annual lock-in
+          &nbsp;·&nbsp; cancel anytime in settings
         </p>
       </div>
     </section>

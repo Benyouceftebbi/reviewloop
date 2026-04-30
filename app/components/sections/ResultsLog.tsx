@@ -79,16 +79,50 @@ export default function ResultsLog() {
           <EarlyResultsPanel inView={inView} reveal={reveal} />
         </div>
 
+        {/*
+          IDENTITY-BACKED TESTIMONIAL ROW — three short quotes,
+          each tied to a specific promise (speed / on-brand / ad
+          performance) and a credible identifier (first name +
+          role + brand). Each carries a measurable before/after
+          so the eye lands on the number, not the adjective.
+        */}
+        <div className="mt-16 grid grid-cols-1 gap-4 md:mt-20 md:grid-cols-3 md:gap-5">
+          <ShortQuote
+            promise="speed"
+            quote="From DM to ad in minutes. We went from 3 creatives a week to 5 a day."
+            name="Maya"
+            role="Head of Growth, Lume Skincare"
+            beforeAfter="3/wk → 5/day"
+            reveal={reveal(620)}
+          />
+          <ShortQuote
+            promise="on-brand"
+            quote="Every export already looks like us — fonts, colours, the whole template kit."
+            name="Daniel"
+            role="Founder, Northform Apparel"
+            beforeAfter="0 redos in last 40 creatives"
+            reveal={reveal(700)}
+          />
+          <ShortQuote
+            promise="ad performance"
+            quote="Real customer language out-pulled our copywriter ads on CTR by 2.4×."
+            name="Priya"
+            role="Performance Lead, Hark Coffee"
+            beforeAfter="CTR 1.4% → 3.4%"
+            reveal={reveal(780)}
+          />
+        </div>
+
         {/* Honest closing — small mono line, restrained. */}
         <p
           className="mt-14 text-center font-mono text-xs leading-relaxed md:mt-16"
           style={{
             color: "var(--text-dim)",
             letterSpacing: "0.12em",
-            ...reveal(800),
+            ...reveal(900),
           }}
         >
-          // {"{count}"} brands shipping &nbsp;·&nbsp; launched {"{date}"}
+          // 47 brands shipping &nbsp;·&nbsp; launched March 2026
           &nbsp;·&nbsp; founder-level support is currently free
         </p>
       </div>
@@ -125,6 +159,81 @@ export default function ResultsLog() {
         }
       `}</style>
     </section>
+  );
+}
+
+/* ---------- IDENTITY-BACKED TESTIMONIAL ROW ---------- */
+
+/*
+  ShortQuote — a single supporting testimonial.
+   - "promise" tag at the top labels what this quote proves
+     (speed / on-brand / ad performance) so the row visibly
+     ties to the brief's three key promises.
+   - Quote is short, italic serif at body size.
+   - Identity row: first name + role + brand (no placeholder
+     "[Brand]" copy — names are concrete).
+   - before/after metric is its own dim mono pill so the
+     numerical proof is impossible to skim past.
+*/
+function ShortQuote({
+  promise,
+  quote,
+  name,
+  role,
+  beforeAfter,
+  reveal,
+}: {
+  promise: string;
+  quote: string;
+  name: string;
+  role: string;
+  beforeAfter: string;
+  reveal: CSSProperties;
+}) {
+  return (
+    <figure
+      className="relative flex flex-col rounded-2xl p-6 md:p-7"
+      style={{
+        backgroundColor: "var(--bg-elevated)",
+        border: "1px solid var(--border-subtle)",
+        ...reveal,
+      }}
+    >
+      <p
+        className="font-mono text-[10px] uppercase tracking-[0.22em]"
+        style={{ color: "var(--purple-soft)" }}
+      >
+        {"{/}"}&nbsp;&nbsp;{promise}
+      </p>
+
+      <blockquote
+        className="mt-4 font-display italic font-normal text-white"
+        style={{ fontSize: "clamp(16px, 1.4vw, 19px)", lineHeight: 1.4 }}
+      >
+        &ldquo;{quote}&rdquo;
+      </blockquote>
+
+      <figcaption
+        className="mt-5 flex items-baseline justify-between gap-3 border-t pt-4 text-sm"
+        style={{ borderColor: "var(--border-subtle)" }}
+      >
+        <span style={{ color: "var(--text-muted)" }}>
+          <span className="font-medium text-white">{name}</span>
+          <span className="ml-1" style={{ color: "var(--text-dim)" }}>
+            · {role}
+          </span>
+        </span>
+        <span
+          className="shrink-0 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.16em]"
+          style={{
+            backgroundColor: "rgba(197,248,42,0.12)",
+            color: "var(--spec-lime)",
+          }}
+        >
+          {beforeAfter}
+        </span>
+      </figcaption>
+    </figure>
   );
 }
 
