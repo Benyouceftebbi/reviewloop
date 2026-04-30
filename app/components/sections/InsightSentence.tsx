@@ -81,12 +81,12 @@ export default function InsightSentence() {
     <section
       ref={ref}
       className="relative"
-      // 130vh = the sticky inner pins for ~30vh of scroll. That's
-      // enough for the word-by-word lighting animation to land
-      // without leaving the user in a dead-air zone after the
-      // animation completes. Was 200vh; trimmed to remove the empty
-      // gap between this section and Section 3.
-      style={{ minHeight: "130vh" }}
+      // 112vh = sticky pins for ~12vh of scroll. Just enough scroll
+      // room for the word-by-word lighting animation to land, but no
+      // empty parent slot left after the sticky unpins — which was
+      // showing up as a large dead-air zone between this section and
+      // HowReplay. Was 130vh, trimmed again to close that gap.
+      style={{ minHeight: "112vh" }}
     >
       {/* No section bg / no per-section glow — the page-level
           PageBackground covers atmospheric lighting for this zone. */}
