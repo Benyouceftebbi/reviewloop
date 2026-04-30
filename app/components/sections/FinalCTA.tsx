@@ -305,10 +305,17 @@ function Mote({
      hero's CTA, kept consistent across the page.
    - The lime-glow micro-pulse (3s loop) lives on the outer pill.
 */
+/*
+  ConnectPill — the FinalCTA section's primary action. Uses the
+  same "Get 10 free creatives" label as every other primary CTA
+  on the page so the offer reads as one consistent ask, never
+  two competing actions ("Sign in" vs "Connect Meta" vs "Start
+  free first" — all of which used to live on the same scroll).
+*/
 function ConnectPill() {
   return (
     <a
-      href="#"
+      href="#get-started"
       className="group relative inline-flex items-center rounded-full py-2 pl-2 pr-6 md:pr-8 animate-cta-pulse transition-colors duration-300 hover:bg-white"
       style={{ backgroundColor: "var(--spec-lime)", color: "#1A1A1A" }}
     >
@@ -330,7 +337,7 @@ function ConnectPill() {
       </span>
 
       <span className="ml-3 text-[15px] font-medium md:text-[16px]">
-        Connect your Meta account.
+        Get 10 free creatives
       </span>
     </a>
   );

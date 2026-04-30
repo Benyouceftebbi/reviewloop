@@ -35,7 +35,6 @@ export default function Home() {
         <PageBackground />
 
         <Hero />
-        <LogoStrip />
         <InsightSentence />
         <HowReplay />
         <DemoFeed />

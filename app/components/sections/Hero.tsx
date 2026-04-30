@@ -104,6 +104,13 @@ export default function Hero() {
           Customer-led ad creative, on autopilot
         </p>
 
+        {/*
+          H1 — names the SOURCES (reviews/comments/DMs), the OUTPUT
+          (Meta-ready ad creatives), and the time-to-value (under 60s)
+          all in the visible hero. Pills keep the brand-color drama
+          on the source words; the output is plain weight so the
+          sentence reads cleanly without italic noise.
+        */}
         <h1 className="mx-auto max-w-[1300px] text-center font-medium leading-[1.08] tracking-tight text-[clamp(2.6rem,5.2vw,4.5rem)]">
           Turn your{" "}
           {/*
@@ -157,33 +164,73 @@ export default function Hero() {
             DMs
           </Pill>{" "}
           into{" "}
-          <PlayThumb />{" "}
-          scroll-stopping{" "}
-          <em className="font-display italic font-normal text-white/95">ads</em>
+          <em className="font-display italic font-normal text-white/95">
+            Meta-ready
+          </em>{" "}
+          ad creatives.
         </h1>
 
-        <div className="mt-20 grid grid-cols-1 gap-12 md:grid-cols-2 md:px-12">
-          <div className="flex gap-4">
-            <span className="font-mono text-body-s text-muted">{"{/}"}</span>
-            <p className="text-body-m">
-              Plug in once. ReviewLoop pulls every review, comment, and DM
-              from Meta, Shopify, and Trustpilot — automatically.
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <span className="font-mono text-body-s text-muted">{"{/}"}</span>
-            <p className="text-body-m">
-              Out the other end: ad-ready creatives, hooks, and captions
-              built from real customer voices — in minutes, not weeks.
-            </p>
-          </div>
+        {/* Time-to-value, single line, dim — answers "how fast" instantly. */}
+        <p className="mt-6 text-center font-mono text-body-s tracking-wide text-muted">
+          {"// "}from comment to ad, in under 60 seconds.
+        </p>
+
+        {/*
+          Two short, scannable copy lines (no italic/serif noise) that
+          ground the headline: what we plug into, what comes out. The
+          decorative {"{/}"} prefix was distracting reading flow on
+          a hero that already carries chip + emoji + serif weight, so
+          it's been trimmed.
+        */}
+        <div className="mt-16 grid grid-cols-1 gap-10 md:grid-cols-2 md:px-12">
+          <p className="text-body-m text-muted">
+            Plug in once. ReviewLoop pulls every review, comment, and DM
+            from Meta, Shopify, and Trustpilot — automatically.
+          </p>
+          <p className="text-body-m text-muted">
+            Out the other end: ad-ready creatives, hooks, and captions
+            built from real customer voices — in minutes, not weeks.
+          </p>
         </div>
 
-        <div className="mt-12 flex items-center justify-between md:px-12">
-          <div className="flex gap-3">
-            <Tag>DTC</Tag>
-            <Tag>Shopify</Tag>
-            <Tag>Meta Ads</Tag>
+        {/*
+          ABOVE-THE-FOLD TRUST PROOF — two metric-backed claims,
+          ordered to mirror the brief: speed first (the headline
+          promise), then security (the most-asked objection on
+          Meta-OAuth tools). Both numbers come straight from
+          on-page facts already shown deeper in the page.
+        */}
+        <div className="mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3 md:px-12">
+          <ProofPoint metric="<60s" label="per creative" />
+          <span aria-hidden className="hidden h-3 w-px bg-white/20 md:block" />
+          <ProofPoint metric="OAuth" label="no password access" />
+          <span aria-hidden className="hidden h-3 w-px bg-white/20 md:block" />
+          <ProofPoint metric="Meta · Shopify · Trustpilot" label="works in your stack" />
+        </div>
+
+        <div className="mt-12 flex flex-col items-center justify-between gap-8 md:flex-row md:items-end md:px-12">
+          <div className="flex flex-col gap-4">
+            <div className="flex flex-wrap gap-3">
+              <Tag>DTC</Tag>
+              <Tag>Shopify</Tag>
+              <Tag>Meta Ads</Tag>
+            </div>
+            {/*
+              "WHAT YOU GET" + "HOW IT STARTS" — sit right next to
+              the CTA so the user knows the outcome and the first
+              click before they commit. Two single lines, mono dim,
+              spec-aligned.
+            */}
+            <ul className="flex flex-col gap-1 font-mono text-body-s text-muted">
+              <li>
+                <span className="text-white/70">What you get:</span>{" "}
+                hooks · captions · sized assets (1:1, 4:5, 9:16)
+              </li>
+              <li>
+                <span className="text-white/70">How it starts:</span>{" "}
+                connect Meta, Shopify, or Trustpilot
+              </li>
+            </ul>
           </div>
           {/*
             BOOK-A-CALL CTA — endless-arrow hover pattern.
@@ -201,26 +248,37 @@ export default function Hero() {
              - Result: the visible arrow exits the top, the duplicate from below
                slides into its place — feels like a continuous upward motion.
           */}
-          <a href="#" className="group flex items-center gap-1">
-            {/* Arrow circle — bigger now (h-16 vs old h-14), tighter gap to pill. */}
-            <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-lime text-canvas transition-colors duration-300 group-hover:bg-white">
-              {/*
-                Stacked arrow column: two cells, each exactly the circle's
-                height, so the column is 2× tall. Translating by -50% on
-                hover shifts the column up by exactly one cell — the bottom
-                arrow slides into the visible window.
-              */}
-              <span className="flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:-translate-y-1/2">
-                <span className="flex h-16 items-center justify-center"><ArrowUp /></span>
-                <span className="flex h-16 items-center justify-center"><ArrowUp /></span>
+          {/*
+            Primary CTA — the SAME free-first action used everywhere
+            else on the page. Microcopy underneath spells out the
+            outcome and the first three clicks so the user knows
+            exactly what they're signing up for.
+          */}
+          <div className="flex flex-col items-center gap-3 md:items-end">
+            <a href="#get-started" className="group flex items-center gap-1">
+              {/* Arrow circle — bigger now (h-16 vs old h-14), tighter gap to pill. */}
+              <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-lime text-canvas transition-colors duration-300 group-hover:bg-white">
+                {/*
+                  Stacked arrow column: two cells, each exactly the circle's
+                  height, so the column is 2× tall. Translating by -50% on
+                  hover shifts the column up by exactly one cell — the bottom
+                  arrow slides into the visible window.
+                */}
+                <span className="flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:-translate-y-1/2">
+                  <span className="flex h-16 items-center justify-center"><ArrowUp /></span>
+                  <span className="flex h-16 items-center justify-center"><ArrowUp /></span>
+                </span>
               </span>
-            </span>
 
-            {/* Pill — color swap on hover matches the circle. */}
-            <span className="rounded-pill bg-lime px-10 py-5 font-medium text-canvas transition-colors duration-300 group-hover:bg-white">
-              Get 10 free creatives
-            </span>
-          </a>
+              {/* Pill — color swap on hover matches the circle. */}
+              <span className="rounded-pill bg-lime px-10 py-5 font-medium text-canvas transition-colors duration-300 group-hover:bg-white">
+                Get 10 free creatives
+              </span>
+            </a>
+            <p className="font-mono text-body-s text-muted text-center md:text-right">
+              Connect, pick a brand, generate your first creative — about 30 seconds.
+            </p>
+          </div>
         </div>
       </div>
     </section>
@@ -365,18 +423,30 @@ function ArrowUp() {
   );
 }
 
-function PlayThumb() {
-  return (
-    <span className="relative inline-flex h-[1em] w-[1.7em] items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-900 align-middle text-[0.3em] font-medium text-white">
-      <span aria-hidden>▶ Play</span>
-    </span>
-  );
-}
-
 function Tag({ children }: { children: React.ReactNode }) {
   return (
     <span className="rounded-pill bg-white/5 px-5 py-2 text-body-s">
       {children}
+    </span>
+  );
+}
+
+/*
+  ProofPoint — a single metric-backed claim in the above-the-fold
+  trust strip. Number is the loud bit (italic serif, brand lime),
+  the label is dim mono. Lined up in a row of three with hairline
+  separators so the eye reads them as one row, not three chips.
+*/
+function ProofPoint({ metric, label }: { metric: string; label: string }) {
+  return (
+    <span className="flex items-baseline gap-2">
+      <span
+        className="font-display italic font-normal text-white"
+        style={{ color: "var(--spec-lime, #d0f601)" }}
+      >
+        {metric}
+      </span>
+      <span className="font-mono text-body-s text-muted">{label}</span>
     </span>
   );
 }

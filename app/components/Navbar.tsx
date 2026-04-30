@@ -22,9 +22,11 @@ import { useEffect, useState } from "react";
 type NavLink = { href: string; label: string };
 
 const NAV: NavLink[] = [
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#use-cases",    label: "Use cases" },
-  { href: "#pricing",      label: "Pricing" },
+  { href: "#how-it-works",  label: "How it works" },
+  { href: "#demo",          label: "Demo" },
+  { href: "#use-cases",     label: "Use cases" },
+  { href: "#early-results", label: "Results" },
+  { href: "#pricing",       label: "Pricing" },
 ];
 
 export default function Navbar() {
@@ -46,6 +48,31 @@ export default function Navbar() {
   // to an anchor doesn't leave the panel open over the destination).
   const closeMobile = () => setMobileOpen(false);
 
+  // Intercept in-page anchor clicks and route them through Lenis so
+  // the scroll feel matches the rest of the page (which uses Lenis
+  // for smooth wheel/touch scrolling). Falls back to native anchor
+  // behavior if Lenis hasn't initialized for any reason.
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) => {
+    if (!href.startsWith("#")) return;
+    const target =
+      href === "#"
+        ? document.body
+        : document.querySelector<HTMLElement>(href);
+    if (!target) return;
+
+    const lenis = (window as unknown as { __lenis?: { scrollTo: (t: HTMLElement | number, o?: { offset?: number; duration?: number }) => void } }).__lenis;
+    if (!lenis) return; // let the browser handle it natively
+
+    e.preventDefault();
+    // Offset by the fixed nav height so the section heading isn't
+    // tucked underneath the frosted-glass bar after scrolling.
+    lenis.scrollTo(target, { offset: -80, duration: 1.2 });
+    closeMobile();
+  };
+
   return (
     <header className="fixed inset-x-0 top-0 z-50">
       {/* Frosted-glass background layer. */}
@@ -55,16 +82,21 @@ export default function Navbar() {
       />
 
       <div className="relative mx-auto flex max-w-[1600px] items-center justify-between gap-3 px-4 py-4 md:px-10 md:py-5">
-        <a href="#" className="text-2xl font-medium tracking-tight">
+        <a
+          href="#"
+          onClick={(e) => handleNavClick(e, "#")}
+          className="text-2xl font-medium tracking-tight"
+        >
           reviewloop
         </a>
 
         {/* DESKTOP NAV */}
-        <ul className="hidden items-center gap-10 text-body-m md:flex">
+        <ul className="hidden items-center gap-7 text-body-m md:flex lg:gap-10">
           {NAV.map((link) => (
             <li key={link.href}>
               <a
                 href={link.href}
+                onClick={(e) => handleNavClick(e, link.href)}
                 className="transition hover:text-muted"
               >
                 {link.label}
@@ -75,7 +107,7 @@ export default function Navbar() {
 
         {/* RIGHT CLUSTER — Sign in pill always visible, hamburger only on mobile. */}
         <div className="flex items-center gap-2 md:gap-3">
-          <SignInPill />
+          <SignInPill onClick={(e) => handleNavClick(e, "#get-started")} />
 
           <button
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -92,21 +124,34 @@ export default function Navbar() {
       <MobilePanel
         isOpen={mobileOpen}
         onLinkTap={closeMobile}
+        onNavClick={handleNavClick}
       />
     </header>
   );
 }
 
-/* ---------- Sign in pill (desktop + mobile) ---------- */
+/* ---------- Primary CTA pill (desktop + mobile) ---------- */
 /*
-  Same lime-fill hover trick as the previous Contact Us pill.
-  An absolute lime <span> sits inside the pill at scaleX(0) + origin-left,
-  then scales to 1 on group-hover, sweeping across left → right.
+  The single primary CTA used everywhere on the site:
+  "Get 10 free creatives" → #get-started.
+
+  Same lime-fill hover trick as before — an absolute lime <span>
+  sits inside the pill at scaleX(0) + origin-left, then scales to 1
+  on group-hover, sweeping across left → right.
+
+  Compact mode trims the long label down to "Get 10 free" so the
+  navbar stays single-row on small viewports without forcing a
+  separate component. The full label always renders on md+.
 */
-function SignInPill() {
+function SignInPill({
+  onClick,
+}: {
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}) {
   return (
     <a
-      href="#"
+      href="#get-started"
+      onClick={onClick}
       className="group relative flex items-center gap-2 overflow-hidden rounded-pill bg-white px-4 py-2 text-canvas md:gap-3 md:px-6 md:py-3"
     >
       <span
@@ -114,7 +159,8 @@ function SignInPill() {
         className="pointer-events-none absolute inset-0 origin-left scale-x-0 bg-lime transition-transform duration-400 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover:scale-x-100"
       />
       <span className="relative z-10 text-sm font-medium md:text-base">
-        Sign in
+        <span className="md:hidden">Get 10 free</span>
+        <span className="hidden md:inline">Get 10 free creatives</span>
       </span>
       <span className="relative z-10 grid h-7 w-7 place-items-center rounded-full bg-canvas text-white md:h-8 md:w-8">
         <ArrowUpRight />
@@ -128,9 +174,11 @@ function SignInPill() {
 function MobilePanel({
   isOpen,
   onLinkTap,
+  onNavClick,
 }: {
   isOpen: boolean;
   onLinkTap: () => void;
+  onNavClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
 }) {
   return (
     <div
@@ -147,7 +195,10 @@ function MobilePanel({
             <li key={link.href}>
               <a
                 href={link.href}
-                onClick={onLinkTap}
+                onClick={(e) => {
+                  onNavClick(e, link.href);
+                  onLinkTap();
+                }}
                 className="block px-6 py-5 text-xl font-medium transition hover:bg-canvas/5"
               >
                 {link.label}
@@ -156,14 +207,18 @@ function MobilePanel({
           ))}
         </ul>
 
-        {/* Sign in CTA at the bottom of the panel. */}
+        {/* Primary CTA at the bottom of the panel — same label as
+            every other primary action on the site. */}
         <div className="border-t border-canvas/8 p-4">
           <a
-            href="#"
-            onClick={onLinkTap}
+            href="#get-started"
+            onClick={(e) => {
+              onNavClick(e, "#get-started");
+              onLinkTap();
+            }}
             className="flex items-center justify-between rounded-pill bg-canvas px-5 py-3 text-white transition-colors hover:bg-lime hover:text-canvas"
           >
-            <span className="font-medium">Sign in</span>
+            <span className="font-medium">Get 10 free creatives</span>
             <span className="grid h-7 w-7 place-items-center rounded-full bg-white text-canvas">
               <ArrowUpRight />
             </span>
