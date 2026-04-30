@@ -47,7 +47,7 @@ const GHOSTS = [
   "obsessed obsessed obsessed",
   "shipping was insane fast",
   "my friend asked what i was using",
-  "ok fine you converted me",
+
 ];
 
 export default function InsightSentence() {
