@@ -22,9 +22,11 @@ import { useEffect, useState } from "react";
 type NavLink = { href: string; label: string };
 
 const NAV: NavLink[] = [
-  { href: "#how-it-works", label: "How it works" },
-  { href: "#use-cases",    label: "Use cases" },
-  { href: "#pricing",      label: "Pricing" },
+  { href: "#how-it-works",  label: "How it works" },
+  { href: "#demo",          label: "Demo" },
+  { href: "#use-cases",     label: "Use cases" },
+  { href: "#early-results", label: "Results" },
+  { href: "#pricing",       label: "Pricing" },
 ];
 
 export default function Navbar() {
@@ -89,7 +91,7 @@ export default function Navbar() {
         </a>
 
         {/* DESKTOP NAV */}
-        <ul className="hidden items-center gap-10 text-body-m md:flex">
+        <ul className="hidden items-center gap-7 text-body-m md:flex lg:gap-10">
           {NAV.map((link) => (
             <li key={link.href}>
               <a
@@ -105,7 +107,7 @@ export default function Navbar() {
 
         {/* RIGHT CLUSTER — Sign in pill always visible, hamburger only on mobile. */}
         <div className="flex items-center gap-2 md:gap-3">
-          <SignInPill />
+          <SignInPill onClick={(e) => handleNavClick(e, "#get-started")} />
 
           <button
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -134,10 +136,15 @@ export default function Navbar() {
   An absolute lime <span> sits inside the pill at scaleX(0) + origin-left,
   then scales to 1 on group-hover, sweeping across left → right.
 */
-function SignInPill() {
+function SignInPill({
+  onClick,
+}: {
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+}) {
   return (
     <a
-      href="#"
+      href="#get-started"
+      onClick={onClick}
       className="group relative flex items-center gap-2 overflow-hidden rounded-pill bg-white px-4 py-2 text-canvas md:gap-3 md:px-6 md:py-3"
     >
       <span
@@ -195,8 +202,11 @@ function MobilePanel({
         {/* Sign in CTA at the bottom of the panel. */}
         <div className="border-t border-canvas/8 p-4">
           <a
-            href="#"
-            onClick={onLinkTap}
+            href="#get-started"
+            onClick={(e) => {
+              onNavClick(e, "#get-started");
+              onLinkTap();
+            }}
             className="flex items-center justify-between rounded-pill bg-canvas px-5 py-3 text-white transition-colors hover:bg-lime hover:text-canvas"
           >
             <span className="font-medium">Sign in</span>
