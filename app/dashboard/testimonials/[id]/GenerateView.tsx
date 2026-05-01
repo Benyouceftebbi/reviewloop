@@ -74,7 +74,7 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
   const meta = PLATFORM_META[t.platform];
   const kind = t.kind ?? "text";
 
-  const [mode, setMode] = useState<Mode>("generic");
+  const [mode, setMode] = useState<Mode>("ai");
 
   // Generic-template state
   const [brandIdx, setBrandIdx] = useState(0);
@@ -256,15 +256,15 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
               }}
             >
               <ModeTab
-                label="Generic template"
-                active={mode === "generic"}
-                onClick={() => setMode("generic")}
-              />
-              <ModeTab
                 label="AI generate"
                 active={mode === "ai"}
                 onClick={() => setMode("ai")}
                 badge="new"
+              />
+              <ModeTab
+                label="Generic template"
+                active={mode === "generic"}
+                onClick={() => setMode("generic")}
               />
             </div>
           </div>
@@ -389,7 +389,7 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
           {isReady && (
             <div className="grid grid-cols-2 gap-2">
               <SecondaryBtn label="Download PNG" />
-              <SecondaryBtn label="Send to Meta" />
+              <SecondaryBtn label="Share to socials" />
             </div>
           )}
         </section>

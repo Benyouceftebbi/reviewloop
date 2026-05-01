@@ -27,9 +27,6 @@ type NavItem = {
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: <IconGrid /> },
   { href: "/dashboard/testimonials", label: "Testimonials", icon: <IconMessage /> },
-  { href: "/dashboard/creatives", label: "Creatives", icon: <IconSpark /> },
-  { href: "/dashboard/connections", label: "Connections", icon: <IconLink /> },
-  { href: "/dashboard/settings", label: "Settings", icon: <IconCog /> },
 ];
 
 export default function Sidebar() {
@@ -176,33 +173,4 @@ function IconMessage() {
     </IconBase>
   );
 }
-function IconSpark() {
-  return (
-    <IconBase>
-      <path d="M12 3v4" />
-      <path d="M12 17v4" />
-      <path d="M3 12h4" />
-      <path d="M17 12h4" />
-      <path d="M5.6 5.6l2.8 2.8" />
-      <path d="M15.6 15.6l2.8 2.8" />
-      <path d="M5.6 18.4l2.8-2.8" />
-      <path d="M15.6 8.4l2.8-2.8" />
-    </IconBase>
-  );
-}
-function IconLink() {
-  return (
-    <IconBase>
-      <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1.5 1.5" />
-      <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 1 0 5.66 5.66l1.5-1.5" />
-    </IconBase>
-  );
-}
-function IconCog() {
-  return (
-    <IconBase>
-      <circle cx="12" cy="12" r="3" />
-      <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1.04 1.56V21a2 2 0 0 1-4 0v-.07A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.56-1.04H3a2 2 0 0 1 0-4h.07A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1.04-1.56V3a2 2 0 0 1 4 0v.07A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87 1.7 1.7 0 0 0 1.56 1.04H21a2 2 0 0 1 0 4h-.07a1.7 1.7 0 0 0-1.56 1.04z" />
-    </IconBase>
-  );
-}
+
