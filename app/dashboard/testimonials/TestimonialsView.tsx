@@ -107,6 +107,7 @@ export default function TestimonialsView({ items }: { items: Testimonial[] }) {
 
 function Row({ t }: { t: Testimonial }) {
   const meta = PLATFORM_META[t.platform];
+  const kind = t.kind ?? "text";
   return (
     <li>
       <Link
@@ -151,10 +152,38 @@ function Row({ t }: { t: Testimonial }) {
                 </span>
               </>
             )}
+            {kind !== "text" && <KindBadge kind={kind} duration={t.audioDuration} />}
           </div>
-          <p className="mt-1.5 line-clamp-2 text-[14px] leading-relaxed text-white/85">
-            {t.text}
-          </p>
+
+          {kind === "audio" ? (
+            <div className="mt-2 flex items-center gap-3">
+              <span
+                aria-hidden
+                className="flex h-7 w-7 items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: "rgba(197,248,42,0.12)",
+                  color: "var(--spec-lime)",
+                }}
+              >
+                <PlayIcon />
+              </span>
+              <Waveform
+                bars={t.waveform ?? DEFAULT_WAVE}
+                className="h-6 flex-1 max-w-[280px]"
+              />
+              <span
+                className="font-mono text-[10px] tabular-nums"
+                style={{ color: "var(--text-dim)" }}
+              >
+                {formatDuration(t.audioDuration ?? 0)}
+              </span>
+            </div>
+          ) : (
+            <p className="mt-1.5 line-clamp-2 text-[14px] leading-relaxed text-white/85">
+              {t.text}
+            </p>
+          )}
+
           {t.postContext && (
             <p
               className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.18em]"
@@ -164,6 +193,21 @@ function Row({ t }: { t: Testimonial }) {
             </p>
           )}
         </div>
+
+        {/* Photo thumb on the far right when applicable */}
+        {kind === "photo" && t.imageUrl && (
+          <span
+            aria-hidden
+            className="hidden h-16 w-16 shrink-0 overflow-hidden rounded-xl border sm:block"
+            style={{ borderColor: "var(--border-subtle)" }}
+          >
+            <img
+              src={t.imageUrl}
+              alt=""
+              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+          </span>
+        )}
 
         <div className="flex flex-col items-end gap-2 pl-2">
           {t.unread && (
@@ -192,6 +236,90 @@ function Row({ t }: { t: Testimonial }) {
         </div>
       </Link>
     </li>
+  );
+}
+
+const DEFAULT_WAVE = [0.3, 0.5, 0.7, 0.4, 0.6, 0.8, 0.5, 0.3, 0.5, 0.7, 0.4];
+
+function formatDuration(sec: number) {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function KindBadge({ kind, duration }: { kind: "photo" | "audio"; duration?: number }) {
+  if (kind === "photo") {
+    return (
+      <span
+        className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em]"
+        style={{
+          color: "rgba(255,255,255,0.85)",
+          backgroundColor: "rgba(255,255,255,0.06)",
+        }}
+      >
+        <PhotoIcon /> photo
+      </span>
+    );
+  }
+  return (
+    <span
+      className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.18em]"
+      style={{
+        color: "var(--spec-lime)",
+        backgroundColor: "rgba(197,248,42,0.12)",
+      }}
+    >
+      <MicIcon /> voice {duration ? formatDuration(duration) : ""}
+    </span>
+  );
+}
+
+function Waveform({ bars, className }: { bars: number[]; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={`flex items-center gap-[2px] ${className ?? ""}`}
+      style={{ color: "rgba(197,248,42,0.7)" }}
+    >
+      {bars.map((amp, i) => (
+        <span
+          key={i}
+          className="block w-[2px] rounded-full"
+          style={{
+            height: `${Math.max(15, amp * 100)}%`,
+            backgroundColor: "currentColor",
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
+function PhotoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <circle cx="9" cy="11" r="2" />
+      <path d="M21 17l-5-4-9 7" />
+    </svg>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0014 0" />
+      <path d="M12 18v3" />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="currentColor" aria-hidden>
+      <path d="M8 5v14l11-7z" />
+    </svg>
   );
 }
 

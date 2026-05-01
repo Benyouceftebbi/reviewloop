@@ -4,11 +4,12 @@
   Creative generation screen for a single testimonial.
 
   Layout
-    [Header — back link + source pill + meta]
+    [Header — back link + source pill + meta + media (photo / audio)]
     [Quote block — the actual comment, large and readable]
     [Two-column main]
       LEFT  — Mode tabs (Generic | AI) + the controls for whichever
-              mode is active.
+              mode is active. No vibe selector — output is locked to
+              the brand vibe so it always feels on-brand.
       RIGHT — Live preview of the creative + Generate CTA + actions.
 
   Modes
@@ -16,13 +17,18 @@
                  _demoData.tsx. The CreativeCard there is reused
                  directly so the dashboard stays in lockstep with
                  the marketing demo.
-    "ai"       — pick post type (normal / ad), pick aspect ratio
-                 (1:1, 4:5, 9:16, 16:9, 3:4), pick a vibe (bold,
-                 minimal, playful, editorial). Renders a custom
-                 AI-styled card at the chosen aspect.
+    "ai"       — pick post type (normal / ad) and aspect ratio (1:1,
+                 4:5, 9:16, 16:9, 3:4). Renders a custom AI-styled
+                 card at the chosen aspect using the brand vibe.
+
+  Source media
+    Testimonials can be text, photo (image attached) or audio (voice
+    note). The header renders the appropriate widget. For audio the
+    transcript stored in `t.text` is what gets baked into the
+    creative — same as text testimonials.
 
   Generate animation
-    A 1.4s requestAnimationFrame loop drives the same staged
+    A 1.5s requestAnimationFrame loop drives the same staged
     progress 0..1 that CreativeCard in _demoData.tsx already
     consumes — bg fades, label appears, testimonial typewrites in,
     signature appears, lime "ready" tag pops at the end. The AI
@@ -46,7 +52,6 @@ import {
 type Mode = "generic" | "ai";
 type PostType = "normal" | "ad";
 type AspectId = "1:1" | "4:5" | "9:16" | "16:9" | "3:4";
-type Vibe = "bold" | "minimal" | "playful" | "editorial";
 
 const ASPECTS: { id: AspectId; label: string; ratio: number; hint: string }[] = [
   { id: "1:1", label: "1:1", ratio: 1, hint: "Feed post" },
@@ -56,15 +61,18 @@ const ASPECTS: { id: AspectId; label: string; ratio: number; hint: string }[] = 
   { id: "3:4", label: "3:4", ratio: 3 / 4, hint: "Pinterest" },
 ];
 
-const VIBES: { id: Vibe; label: string; bg: string; text: string; accent: string }[] = [
-  { id: "bold",      label: "Bold",      bg: "#0F0F12", text: "#FFFFFF", accent: "#C5F82A" },
-  { id: "minimal",   label: "Minimal",   bg: "#F4F1EC", text: "#1A1A1A", accent: "#1A1A1A" },
-  { id: "playful",   label: "Playful",   bg: "#FF7A2A", text: "#1A1A1A", accent: "#FFE066" },
-  { id: "editorial", label: "Editorial", bg: "#0F1B2D", text: "#E8E4D8", accent: "#7AC4FF" },
-];
+// One canonical, on-brand vibe — dark canvas, lime accent, display
+// italic for the quote so the AI output always matches the rest of
+// the site's typography.
+const BRAND_VIBE = {
+  bg: "#0A0A0F",
+  text: "#FFFFFF",
+  accent: "#C5F82A",
+};
 
 export default function GenerateView({ testimonial: t }: { testimonial: Testimonial }) {
   const meta = PLATFORM_META[t.platform];
+  const kind = t.kind ?? "text";
 
   const [mode, setMode] = useState<Mode>("generic");
 
@@ -74,7 +82,6 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
   // AI state
   const [postType, setPostType] = useState<PostType>("ad");
   const [aspect, setAspect] = useState<AspectId>("1:1");
-  const [vibe, setVibe] = useState<Vibe>("bold");
 
   // Shared generation state
   const [progress, setProgress] = useState(0);
@@ -86,7 +93,7 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
     setProgress(0);
     setGenerating(false);
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
-  }, [mode, brandIdx, postType, aspect, vibe]);
+  }, [mode, brandIdx, postType, aspect]);
 
   const generate = () => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -108,7 +115,6 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
 
   const isReady = progress >= 0.95;
   const brand = BRANDS[brandIdx] ?? BRANDS[0];
-  const vibeKit = VIBES.find((v) => v.id === vibe) ?? VIBES[0];
   const aspectMeta = ASPECTS.find((a) => a.id === aspect) ?? ASPECTS[0];
 
   return (
@@ -121,7 +127,7 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
         <span aria-hidden>←</span> back to inbox
       </Link>
 
-      {/* Header card with source + author + quote */}
+      {/* Header card with source + author + media + quote */}
       <header
         className="flex flex-col gap-4 rounded-2xl border p-5 md:p-6"
         style={{
@@ -130,13 +136,30 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
         }}
       >
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <span
-            className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em]"
-            style={{ color: meta.color, backgroundColor: meta.bg }}
-          >
-            {meta.icon}
-            {meta.label}
-          </span>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className="inline-flex items-center gap-2 rounded-full px-3 py-1.5 font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: meta.color, backgroundColor: meta.bg }}
+            >
+              {meta.icon}
+              {meta.label}
+            </span>
+            {kind !== "text" && (
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 font-mono text-[10px] uppercase tracking-[0.18em]"
+                style={{
+                  color: kind === "audio" ? "var(--spec-lime)" : "rgba(255,255,255,0.85)",
+                  backgroundColor:
+                    kind === "audio"
+                      ? "rgba(197,248,42,0.12)"
+                      : "rgba(255,255,255,0.06)",
+                }}
+              >
+                {kind === "audio" ? <MicIcon /> : <PhotoIcon />}
+                {kind === "audio" ? "voice note" : "photo attached"}
+              </span>
+            )}
+          </div>
           <span
             className="font-mono text-[10px] uppercase tracking-[0.22em]"
             style={{ color: "var(--text-dim)" }}
@@ -161,7 +184,37 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
           </div>
         </div>
 
+        {/* Media: photo or audio player */}
+        {kind === "photo" && t.imageUrl && (
+          <div
+            className="overflow-hidden rounded-xl border"
+            style={{ borderColor: "var(--border-subtle)" }}
+          >
+            <img
+              src={t.imageUrl}
+              alt={t.imageAlt ?? "Customer photo"}
+              className="h-full w-full max-h-[320px] object-cover"
+            />
+          </div>
+        )}
+
+        {kind === "audio" && (
+          <AudioPlayer
+            duration={t.audioDuration ?? 0}
+            waveform={t.waveform ?? []}
+          />
+        )}
+
+        {/* Quote (caption for photo, transcript for audio) */}
         <blockquote className="text-[18px] leading-relaxed text-white/90 md:text-[20px]">
+          {kind === "audio" && (
+            <span
+              className="mb-2 block font-mono text-[10px] uppercase tracking-[0.22em]"
+              style={{ color: "var(--text-dim)" }}
+            >
+              // transcript
+            </span>
+          )}
           <span className="font-display italic text-white/40">&ldquo;</span>
           {t.text}
           <span className="font-display italic text-white/40">&rdquo;</span>
@@ -224,8 +277,6 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
               onPostType={setPostType}
               aspect={aspect}
               onAspect={setAspect}
-              vibe={vibe}
-              onVibe={setVibe}
             />
           )}
         </section>
@@ -261,7 +312,6 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
               <CreativeCard brand={brand} testimonial={t.text} progress={progress} />
             ) : (
               <AICreativeCard
-                vibe={vibeKit}
                 aspect={aspectMeta.ratio}
                 postType={postType}
                 testimonial={t.text}
@@ -292,7 +342,7 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
                 <p className="text-[12px] text-white/70">
                   {mode === "generic"
                     ? "Pick a template, then generate."
-                    : "Pick a format & vibe, then generate."}
+                    : "Pick a format & size, then generate."}
                 </p>
               </div>
             )}
@@ -346,6 +396,114 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
       </div>
     </div>
   );
+}
+
+/* ------------------------------------------------------------------ */
+/* Audio player                                                        */
+/* ------------------------------------------------------------------ */
+
+function AudioPlayer({ duration, waveform }: { duration: number; waveform: number[] }) {
+  const [playing, setPlaying] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const rafRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!playing) {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      return;
+    }
+    const startedAt = performance.now() - progress * duration * 1000;
+    const tick = (now: number) => {
+      const elapsed = (now - startedAt) / 1000;
+      const ratio = Math.min(1, elapsed / Math.max(1, duration));
+      setProgress(ratio);
+      if (ratio < 1) {
+        rafRef.current = requestAnimationFrame(tick);
+      } else {
+        setPlaying(false);
+      }
+    };
+    rafRef.current = requestAnimationFrame(tick);
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playing, duration]);
+
+  const onToggle = () => {
+    if (progress >= 1) setProgress(0);
+    setPlaying((p) => !p);
+  };
+
+  return (
+    <div
+      className="flex items-center gap-4 rounded-xl border p-3"
+      style={{
+        borderColor: "var(--border-subtle)",
+        backgroundColor: "rgba(197,248,42,0.04)",
+      }}
+    >
+      <button
+        type="button"
+        onClick={onToggle}
+        className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full transition-transform hover:scale-105"
+        style={{
+          backgroundColor: "var(--spec-lime)",
+          color: "#1A1A1A",
+          boxShadow: "0 0 20px var(--lime-glow)",
+        }}
+        aria-label={playing ? "Pause voice note" : "Play voice note"}
+      >
+        {playing ? <PauseIcon /> : <PlayIcon />}
+      </button>
+
+      <Waveform bars={waveform} progress={progress} className="h-10 flex-1" />
+
+      <span
+        className="shrink-0 font-mono text-[11px] tabular-nums"
+        style={{ color: "var(--text-dim)" }}
+      >
+        {formatDuration(progress * duration)} / {formatDuration(duration)}
+      </span>
+    </div>
+  );
+}
+
+function Waveform({
+  bars,
+  progress = 0,
+  className,
+}: {
+  bars: number[];
+  progress?: number;
+  className?: string;
+}) {
+  const cutoff = Math.floor(bars.length * progress);
+  return (
+    <span
+      aria-hidden
+      className={`flex items-center gap-[3px] ${className ?? ""}`}
+    >
+      {bars.map((amp, i) => (
+        <span
+          key={i}
+          className="block w-[3px] rounded-full transition-colors"
+          style={{
+            height: `${Math.max(15, amp * 100)}%`,
+            backgroundColor:
+              i < cutoff ? "var(--spec-lime)" : "rgba(255,255,255,0.25)",
+          }}
+        />
+      ))}
+    </span>
+  );
+}
+
+function formatDuration(sec: number) {
+  const safe = Math.max(0, sec);
+  const m = Math.floor(safe / 60);
+  const s = Math.floor(safe % 60);
+  return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 /* ------------------------------------------------------------------ */
@@ -405,15 +563,11 @@ function AIControls({
   onPostType,
   aspect,
   onAspect,
-  vibe,
-  onVibe,
 }: {
   postType: PostType;
   onPostType: (p: PostType) => void;
   aspect: AspectId;
   onAspect: (a: AspectId) => void;
-  vibe: Vibe;
-  onVibe: (v: Vibe) => void;
 }) {
   return (
     <div className="flex flex-col gap-5">
@@ -463,27 +617,15 @@ function AIControls({
         </div>
       </div>
 
-      {/* Vibe */}
-      <div className="flex flex-col gap-2">
-        <span
-          className="font-mono text-[10px] uppercase tracking-[0.22em]"
-          style={{ color: "var(--text-dim)" }}
-        >
-          // vibe
-        </span>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {VIBES.map((v) => (
-            <VibeChip
-              key={v.id}
-              label={v.label}
-              bg={v.bg}
-              text={v.text}
-              accent={v.accent}
-              active={vibe === v.id}
-              onClick={() => onVibe(v.id)}
-            />
-          ))}
-        </div>
+      <div
+        className="rounded-xl border p-3 font-mono text-[11px] leading-relaxed"
+        style={{
+          borderColor: "var(--border-subtle)",
+          color: "var(--text-muted)",
+        }}
+      >
+        Output is locked to the brand vibe — dark canvas, lime accent,
+        editorial type. Pick the format and size, then generate.
       </div>
     </div>
   );
@@ -494,18 +636,17 @@ function AIControls({
 /* ------------------------------------------------------------------ */
 
 function AICreativeCard({
-  vibe,
   aspect,
   postType,
   testimonial,
   progress,
 }: {
-  vibe: { bg: string; text: string; accent: string; id: Vibe };
   aspect: number;
   postType: PostType;
   testimonial: string;
   progress: number;
 }) {
+  const v = BRAND_VIBE;
   const p = clamp(progress, 0, 1);
   const bgOpacity = clamp(p / 0.15, 0, 1);
   const labelOpacity = clamp((p - 0.15) / 0.25, 0, 1);
@@ -516,24 +657,23 @@ function AICreativeCard({
   const visible = testimonial.slice(0, textCount);
   const stillTyping = textCount > 0 && textCount < testimonial.length;
 
-  const fontStyle: CSSProperties =
-    vibe.id === "editorial" || vibe.id === "minimal"
-      ? { fontFamily: "var(--font-display)", fontStyle: "italic", fontWeight: 400 }
-      : { fontFamily: "var(--font-sans)", fontWeight: 600 };
+  const fontStyle: CSSProperties = {
+    fontFamily: "var(--font-display)",
+    fontStyle: "italic",
+    fontWeight: 400,
+  };
 
-  // Gradient overlay differs slightly for "ad" vs "normal" so the
-  // post type is actually visible in the output.
   const adOverlay =
     postType === "ad"
-      ? `radial-gradient(120% 80% at 0% 0%, ${vibe.accent}26, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${vibe.accent}1f, transparent 60%)`
-      : `radial-gradient(120% 80% at 50% 0%, ${vibe.accent}14, transparent 70%)`;
+      ? `radial-gradient(120% 80% at 0% 0%, ${v.accent}26, transparent 60%), radial-gradient(120% 80% at 100% 100%, ${v.accent}1f, transparent 60%)`
+      : `radial-gradient(120% 80% at 50% 0%, ${v.accent}14, transparent 70%)`;
 
   return (
     <div
       className="relative w-full overflow-hidden rounded-2xl"
       style={{
         aspectRatio: `${aspect}`,
-        backgroundColor: vibe.bg,
+        backgroundColor: v.bg,
         opacity: 0.2 + 0.8 * bgOpacity,
         boxShadow: "0 12px 40px rgba(0,0,0,0.35)",
         backgroundImage: adOverlay,
@@ -555,7 +695,7 @@ function AICreativeCard({
         <div className="flex items-center justify-between">
           <span
             className="font-mono text-[10px] uppercase tracking-[0.22em]"
-            style={{ color: vibe.text, opacity: 0.7 * labelOpacity }}
+            style={{ color: v.text, opacity: 0.7 * labelOpacity }}
           >
             // ai · {postType} post
           </span>
@@ -563,8 +703,8 @@ function AICreativeCard({
             <span
               className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em]"
               style={{
-                color: vibe.bg,
-                backgroundColor: vibe.accent,
+                color: v.bg,
+                backgroundColor: v.accent,
                 opacity: labelOpacity,
               }}
             >
@@ -578,7 +718,7 @@ function AICreativeCard({
           className="leading-[1.18] text-[clamp(16px,2.4vw,28px)]"
           style={{
             ...fontStyle,
-            color: vibe.text,
+            color: v.text,
             minHeight: "2.6em",
           }}
         >
@@ -590,7 +730,7 @@ function AICreativeCard({
             <span
               aria-hidden
               className="ml-0.5 inline-block h-[0.9em] w-[2px] -translate-y-[2px] animate-caret-blink"
-              style={{ backgroundColor: vibe.text }}
+              style={{ backgroundColor: v.text }}
             />
           )}
           {!stillTyping && p > 0.4 && (
@@ -604,7 +744,7 @@ function AICreativeCard({
         <div className="flex items-end justify-between gap-3">
           <span
             className="font-mono text-[10px]"
-            style={{ color: vibe.text, opacity: 0.55 * sigOpacity }}
+            style={{ color: v.text, opacity: 0.55 * sigOpacity }}
           >
             @anon_customer
           </span>
@@ -766,50 +906,6 @@ function AspectChip({
   );
 }
 
-function VibeChip({
-  label,
-  bg,
-  text,
-  accent,
-  active,
-  onClick,
-}: {
-  label: string;
-  bg: string;
-  text: string;
-  accent: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className="flex items-center gap-2 rounded-2xl border p-2 pr-3 transition-all"
-      style={{
-        borderColor: active ? "rgba(197,248,42,0.55)" : "var(--border-subtle)",
-        backgroundColor: active ? "rgba(197,248,42,0.06)" : "rgba(255,255,255,0.02)",
-      }}
-    >
-      <span
-        aria-hidden
-        className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg"
-        style={{ backgroundColor: bg, color: text, border: `1px solid ${accent}33` }}
-      >
-        <span
-          className="h-2 w-2 rounded-full"
-          style={{ backgroundColor: accent }}
-        />
-      </span>
-      <span
-        className="text-[12px] font-medium"
-        style={{ color: active ? "var(--spec-lime)" : "white" }}
-      >
-        {label}
-      </span>
-    </button>
-  );
-}
-
 function SecondaryBtn({ label }: { label: string }) {
   return (
     <button
@@ -823,6 +919,10 @@ function SecondaryBtn({ label }: { label: string }) {
     </button>
   );
 }
+
+/* ------------------------------------------------------------------ */
+/* Icons                                                               */
+/* ------------------------------------------------------------------ */
 
 function SparkleIcon() {
   return (
@@ -852,6 +952,43 @@ function Spinner() {
       aria-hidden
       className="h-4 w-4 animate-spin rounded-full border-2 border-current border-r-transparent"
     />
+  );
+}
+
+function PhotoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="5" width="18" height="14" rx="2.5" />
+      <circle cx="9" cy="11" r="2" />
+      <path d="M21 17l-5-4-9 7" />
+    </svg>
+  );
+}
+
+function MicIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="9" y="3" width="6" height="11" rx="3" />
+      <path d="M5 11a7 7 0 0014 0" />
+      <path d="M12 18v3" />
+    </svg>
+  );
+}
+
+function PlayIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+      <path d="M8 5v14l11-7z" />
+    </svg>
+  );
+}
+
+function PauseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
+      <rect x="6" y="5" width="4" height="14" rx="1" />
+      <rect x="14" y="5" width="4" height="14" rx="1" />
+    </svg>
   );
 }
 

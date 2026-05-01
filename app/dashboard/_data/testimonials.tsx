@@ -22,16 +22,35 @@ export type Platform =
   | "dm"
   | "email";
 
+export type TestimonialKind = "text" | "photo" | "audio";
+
 export type Testimonial = {
   id: string;
   platform: Platform;
   author: string;
   handle: string;
+  /** Caption for photo testimonials, transcript for audio, body for text. */
   text: string;
   rating?: number;     // 1..5 for review-style sources
   postedAt: string;    // ISO
   postContext?: string; // e.g. "Reel: 'Skin reset routine'"
   unread?: boolean;
+
+  /**
+   * Media kind. Defaults to "text" when omitted. Photo testimonials
+   * include an attached image; audio testimonials are voice notes /
+   * voice DMs and ship with a generated transcript stored in `text`.
+   */
+  kind?: TestimonialKind;
+  imageUrl?: string;
+  imageAlt?: string;
+  /** Duration in seconds for audio testimonials. */
+  audioDuration?: number;
+  /**
+   * Pseudo-random waveform amplitudes (0..1) for audio. Pre-baked so
+   * the bars stay stable across renders without needing a real file.
+   */
+  waveform?: number[];
 };
 
 export const TESTIMONIALS: Testimonial[] = [
@@ -63,6 +82,9 @@ export const TESTIMONIALS: Testimonial[] = [
     text: "Best $40 I've spent this year. Fast shipping, packaging is gorgeous, and it actually does what they say.",
     rating: 5,
     postedAt: "2026-04-28T17:05:00Z",
+    kind: "photo",
+    imageUrl: "/testimonials/t3-unboxing.jpg",
+    imageAlt: "Customer flatlay of the serum bottle on a linen surface with dried botanicals.",
   },
   {
     id: "t4",
@@ -78,9 +100,12 @@ export const TESTIMONIALS: Testimonial[] = [
     platform: "dm",
     author: "priya",
     handle: "@priyaeats",
-    text: "had to dm — my mom literally stole mine, ordered another one yesterday lol",
+    text: "ok so i had to send a voice note for this — my mom literally stole mine, like fully took it from my shelf, and i ordered another one yesterday because she's not giving it back lol. you guys really cooked with this one.",
     postedAt: "2026-04-27T20:18:00Z",
     unread: true,
+    kind: "audio",
+    audioDuration: 23,
+    waveform: [0.18, 0.34, 0.52, 0.41, 0.62, 0.78, 0.55, 0.32, 0.48, 0.71, 0.84, 0.66, 0.42, 0.28, 0.55, 0.69, 0.81, 0.72, 0.58, 0.4, 0.51, 0.63, 0.74, 0.49, 0.31, 0.42, 0.6, 0.71, 0.55, 0.36, 0.22],
   },
   {
     id: "t6",
@@ -90,6 +115,9 @@ export const TESTIMONIALS: Testimonial[] = [
     text: "Skeptical at first because every brand says the same thing. This one held up. 4 weeks in, repurchasing.",
     rating: 5,
     postedAt: "2026-04-27T08:00:00Z",
+    kind: "photo",
+    imageUrl: "/testimonials/t6-shelf.jpg",
+    imageAlt: "Customer photo of the bottle on a clean bathroom shelf in soft natural light.",
   },
   {
     id: "t7",
@@ -110,12 +138,15 @@ export const TESTIMONIALS: Testimonial[] = [
   },
   {
     id: "t9",
-    platform: "tiktok",
+    platform: "dm",
     author: "kai",
     handle: "@kaiwearsthings",
-    text: "ok fine you converted me, ordering tonight 😤",
+    text: "alright fine you guys actually converted me. i was like seriously not gonna fall for another tiktok product but i am ordering tonight i swear, send me a discount code i will literally use it.",
     postedAt: "2026-04-25T18:40:00Z",
-    postContext: "Comment on 3-min review duet",
+    postContext: "Voice note in DMs",
+    kind: "audio",
+    audioDuration: 14,
+    waveform: [0.22, 0.41, 0.58, 0.72, 0.5, 0.34, 0.46, 0.65, 0.79, 0.6, 0.42, 0.28, 0.51, 0.68, 0.74, 0.59, 0.38, 0.47, 0.62, 0.5, 0.31, 0.45, 0.6, 0.72, 0.55],
   },
   {
     id: "t10",
@@ -133,7 +164,10 @@ export const TESTIMONIALS: Testimonial[] = [
     handle: "@noah.frames",
     text: "my skincare routine is literally just this product now 😭",
     postedAt: "2026-04-24T19:02:00Z",
-    postContext: "Reel comment",
+    postContext: "Story reply with photo",
+    kind: "photo",
+    imageUrl: "/testimonials/t11-mirror.jpg",
+    imageAlt: "Customer holding the bottle in a softly lit bathroom.",
   },
   {
     id: "t12",
