@@ -107,7 +107,7 @@ export default function Navbar() {
 
         {/* RIGHT CLUSTER — Sign in pill always visible, hamburger only on mobile. */}
         <div className="flex items-center gap-2 md:gap-3">
-          <SignInPill onClick={(e) => handleNavClick(e, "#get-started")} />
+          <SignInPill />
 
           <button
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
@@ -133,7 +133,7 @@ export default function Navbar() {
 /* ---------- Primary CTA pill (desktop + mobile) ---------- */
 /*
   The single primary CTA used everywhere on the site:
-  "Get 10 free creatives" → #get-started.
+  "Get 10 free creatives" → /login.
 
   Same lime-fill hover trick as before — an absolute lime <span>
   sits inside the pill at scaleX(0) + origin-left, then scales to 1
@@ -143,15 +143,10 @@ export default function Navbar() {
   navbar stays single-row on small viewports without forcing a
   separate component. The full label always renders on md+.
 */
-function SignInPill({
-  onClick,
-}: {
-  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
-}) {
+function SignInPill() {
   return (
     <a
-      href="#get-started"
-      onClick={onClick}
+      href="/login"
       className="group relative flex items-center gap-2 overflow-hidden rounded-pill bg-white px-4 py-2 text-canvas md:gap-3 md:px-6 md:py-3"
     >
       <span
@@ -211,11 +206,8 @@ function MobilePanel({
             every other primary action on the site. */}
         <div className="border-t border-canvas/8 p-4">
           <a
-            href="#get-started"
-            onClick={(e) => {
-              onNavClick(e, "#get-started");
-              onLinkTap();
-            }}
+            href="/login"
+            onClick={onLinkTap}
             className="flex items-center justify-between rounded-pill bg-canvas px-5 py-3 text-white transition-colors hover:bg-lime hover:text-canvas"
           >
             <span className="font-medium">Get 10 free creatives</span>
