@@ -37,7 +37,7 @@
 */
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import {
   PLATFORM_META,
   relativeTime,
@@ -87,6 +87,9 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
   const [progress, setProgress] = useState(0);
   const [generating, setGenerating] = useState(false);
   const rafRef = useRef<number | null>(null);
+
+  // Share-to-socials modal
+  const [shareOpen, setShareOpen] = useState(false);
 
   // Reset preview whenever the user changes anything that affects output.
   useEffect(() => {
@@ -389,11 +392,21 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
           {isReady && (
             <div className="grid grid-cols-2 gap-2">
               <SecondaryBtn label="Download PNG" />
-              <SecondaryBtn label="Share to socials" />
+              <SecondaryBtn
+                label="Share to socials"
+                onClick={() => setShareOpen(true)}
+              />
             </div>
           )}
         </section>
       </div>
+
+      {shareOpen && (
+        <ShareModal
+          author={t.author}
+          onClose={() => setShareOpen(false)}
+        />
+      )}
     </div>
   );
 }
@@ -906,9 +919,11 @@ function AspectChip({
   );
 }
 
-function SecondaryBtn({ label }: { label: string }) {
+function SecondaryBtn({ label, onClick }: { label: string; onClick?: () => void }) {
   return (
     <button
+      type="button"
+      onClick={onClick}
       className="rounded-pill border px-4 py-2.5 text-[12px] font-medium text-white/85 transition-colors hover:border-white/25 hover:text-white"
       style={{
         borderColor: "var(--border-soft)",
@@ -917,6 +932,398 @@ function SecondaryBtn({ label }: { label: string }) {
     >
       {label}
     </button>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Share modal                                                         */
+/*                                                                     */
+/* Six channels in a 3-col grid + a copy-link row + schedule. Each tile*/
+/* uses its real brand color as a soft tint so the grid scans like a   */
+/* real publishing tool, but the surrounding chrome stays in our       */
+/* canvas + lime system. Pressing a tile fakes a "publishing" state    */
+/* (spinner -> success check) since we don't have a real OAuth wired   */
+/* yet. Closes on Escape or backdrop click.                            */
+/* ------------------------------------------------------------------ */
+
+type ShareChannel = {
+  id: string;
+  label: string;
+  hint: string;
+  tint: string;     // bg tint
+  fg: string;       // icon color
+  icon: ReactNode;
+};
+
+const SHARE_CHANNELS: ShareChannel[] = [
+  {
+    id: "instagram",
+    label: "Instagram",
+    hint: "Feed, Reel, Story",
+    tint: "rgba(225,48,108,0.12)",
+    fg: "#FF6B9A",
+    icon: <IgGlyph />,
+  },
+  {
+    id: "tiktok",
+    label: "TikTok",
+    hint: "Video post",
+    tint: "rgba(255,255,255,0.06)",
+    fg: "#FFFFFF",
+    icon: <TtGlyph />,
+  },
+  {
+    id: "x",
+    label: "X",
+    hint: "Tweet with media",
+    tint: "rgba(255,255,255,0.05)",
+    fg: "#FFFFFF",
+    icon: <XGlyph />,
+  },
+  {
+    id: "facebook",
+    label: "Facebook",
+    hint: "Page post",
+    tint: "rgba(24,119,242,0.16)",
+    fg: "#5B9BFF",
+    icon: <FbGlyph />,
+  },
+  {
+    id: "linkedin",
+    label: "LinkedIn",
+    hint: "Company update",
+    tint: "rgba(10,102,194,0.18)",
+    fg: "#5BA8FF",
+    icon: <LiGlyph />,
+  },
+  {
+    id: "pinterest",
+    label: "Pinterest",
+    hint: "New pin",
+    tint: "rgba(230,0,35,0.14)",
+    fg: "#FF6B7A",
+    icon: <PinGlyph />,
+  },
+];
+
+function ShareModal({ author, onClose }: { author: string; onClose: () => void }) {
+  const [posting, setPosting] = useState<string | null>(null);
+  const [posted, setPosted] = useState<Set<string>>(new Set());
+  const [copied, setCopied] = useState(false);
+
+  // Esc closes
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    // Lock background scroll while open
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  const onPick = (id: string) => {
+    if (posting || posted.has(id)) return;
+    setPosting(id);
+    // Simulated publish — replace with real OAuth + Graph API later.
+    window.setTimeout(() => {
+      setPosting(null);
+      setPosted((prev) => {
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+    }, 1100);
+  };
+
+  const onCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(
+        `https://reviewloop.app/share/${author.toLowerCase().replace(/\s+/g, "-")}`,
+      );
+    } catch {
+      /* swallow — non-critical */
+    }
+    setCopied(true);
+    window.setTimeout(() => setCopied(false), 1600);
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Share to socials"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+    >
+      {/* Backdrop */}
+      <button
+        type="button"
+        aria-label="Close share dialog"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default"
+        style={{
+          backgroundColor: "rgba(5,6,10,0.72)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+        }}
+      />
+
+      {/* Card */}
+      <div
+        className="relative w-full max-w-[560px] overflow-hidden rounded-3xl border"
+        style={{
+          borderColor: "var(--border-subtle)",
+          backgroundColor: "var(--bg-elevated)",
+          boxShadow:
+            "0 30px 80px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(197,248,42,0.08), 0 0 60px -20px rgba(197,248,42,0.18)",
+        }}
+      >
+        {/* Header */}
+        <div
+          className="flex items-center justify-between border-b px-6 py-4"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
+          <div className="flex items-center gap-3">
+            <span
+              className="flex h-9 w-9 items-center justify-center rounded-xl"
+              style={{
+                backgroundColor: "rgba(197,248,42,0.12)",
+                color: "var(--spec-lime)",
+              }}
+            >
+              <ShareIcon />
+            </span>
+            <div>
+              <p
+                className="font-mono text-[10px] uppercase tracking-[0.22em]"
+                style={{ color: "var(--text-dim)" }}
+              >
+                Distribute creative
+              </p>
+              <h2 className="text-[16px] font-medium text-white">
+                Share to socials
+              </h2>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            aria-label="Close"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <CloseIcon />
+          </button>
+        </div>
+
+        {/* Channels */}
+        <div className="grid grid-cols-2 gap-2 p-4 sm:grid-cols-3">
+          {SHARE_CHANNELS.map((c) => {
+            const isPosting = posting === c.id;
+            const isDone = posted.has(c.id);
+            return (
+              <button
+                key={c.id}
+                type="button"
+                onClick={() => onPick(c.id)}
+                disabled={isPosting || isDone}
+                className="group relative flex flex-col items-start gap-2 rounded-2xl border p-4 text-left transition-all hover:-translate-y-[1px] disabled:cursor-default disabled:hover:translate-y-0"
+                style={{
+                  borderColor: isDone
+                    ? "rgba(197,248,42,0.4)"
+                    : "var(--border-subtle)",
+                  backgroundColor: "rgba(255,255,255,0.02)",
+                }}
+              >
+                <span
+                  aria-hidden
+                  className="flex h-10 w-10 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: c.tint, color: c.fg }}
+                >
+                  {c.icon}
+                </span>
+                <div>
+                  <p className="text-[13px] font-medium text-white">
+                    {c.label}
+                  </p>
+                  <p
+                    className="font-mono text-[10px] uppercase tracking-[0.18em]"
+                    style={{ color: "var(--text-dim)" }}
+                  >
+                    {isDone ? "Posted" : isPosting ? "Posting…" : c.hint}
+                  </p>
+                </div>
+
+                {/* State pip in the corner */}
+                <span
+                  aria-hidden
+                  className="absolute right-3 top-3 flex h-5 w-5 items-center justify-center"
+                >
+                  {isPosting && (
+                    <span
+                      className="h-3.5 w-3.5 animate-spin rounded-full border-[1.5px] border-r-transparent"
+                      style={{ borderColor: "var(--spec-lime)", borderRightColor: "transparent" }}
+                    />
+                  )}
+                  {isDone && (
+                    <span
+                      className="flex h-5 w-5 items-center justify-center rounded-full"
+                      style={{
+                        backgroundColor: "var(--spec-lime)",
+                        color: "var(--canvas)",
+                      }}
+                    >
+                      <CheckIcon />
+                    </span>
+                  )}
+                </span>
+
+                {/* Lime hover ring */}
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-2xl opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+                  style={{
+                    boxShadow: "0 0 0 1px rgba(197,248,42,0.45), 0 0 28px rgba(197,248,42,0.10)",
+                  }}
+                />
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Footer row — copy link + schedule */}
+        <div
+          className="flex flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between"
+          style={{ borderColor: "var(--border-subtle)" }}
+        >
+          <button
+            type="button"
+            onClick={onCopy}
+            className="inline-flex items-center gap-2 rounded-pill border px-4 py-2 text-[12px] text-white/85 transition-colors hover:border-white/25 hover:text-white"
+            style={{
+              borderColor: "var(--border-soft)",
+              backgroundColor: "rgba(255,255,255,0.02)",
+            }}
+          >
+            <LinkIcon />
+            {copied ? "Link copied" : "Copy share link"}
+          </button>
+
+          <button
+            type="button"
+            className="inline-flex items-center gap-2 rounded-pill px-4 py-2 text-[12px] font-medium text-canvas transition-transform duration-300 hover:scale-[1.02]"
+            style={{ backgroundColor: "var(--spec-lime)" }}
+          >
+            <CalendarIcon />
+            Schedule for later
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ---------- Share / channel glyphs ---------- */
+
+function ShareIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <circle cx="6" cy="12" r="2.5" />
+      <circle cx="18" cy="6" r="2.5" />
+      <circle cx="18" cy="18" r="2.5" />
+      <path d="M8.2 10.8l7.6-3.6" />
+      <path d="M8.2 13.2l7.6 3.6" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M6 6l12 12" />
+      <path d="M18 6L6 18" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M5 12l5 5L20 7" />
+    </svg>
+  );
+}
+
+function LinkIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M10 14a4 4 0 0 0 5.66 0l3-3a4 4 0 0 0-5.66-5.66l-1.5 1.5" />
+      <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 1 0 5.66 5.66l1.5-1.5" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3.5" y="5" width="17" height="15" rx="2.5" />
+      <path d="M3.5 9h17" />
+      <path d="M8 3v4" />
+      <path d="M16 3v4" />
+    </svg>
+  );
+}
+
+function IgGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="0.7" fill="currentColor" />
+    </svg>
+  );
+}
+
+function TtGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M14.5 3h2.6c.2 1.7 1.1 3.1 2.6 3.9.6.3 1.3.5 2 .6v2.7a8.6 8.6 0 0 1-4.6-1.4v6.3a5.9 5.9 0 1 1-5.9-5.9c.4 0 .8 0 1.1.1v2.8a3.1 3.1 0 1 0 2 2.9V3z" />
+    </svg>
+  );
+}
+
+function XGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M17.5 3h3l-7 8 8.2 10h-6.4l-5-6.3L4.5 21H1.5l7.5-8.6L1.2 3h6.5l4.5 5.8L17.5 3zm-1 16h1.7L7.6 5H5.8L16.5 19z" />
+    </svg>
+  );
+}
+
+function FbGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M13.5 21v-7h2.4l.4-2.8h-2.8V9.4c0-.8.2-1.4 1.4-1.4h1.5V5.5a19 19 0 0 0-2.2-.1c-2.2 0-3.7 1.3-3.7 3.8v2H8v2.8h2.5V21h3z" />
+    </svg>
+  );
+}
+
+function LiGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M4.5 4.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4zM3 10h3v10H3V10zm6 0h2.9v1.5h.1c.4-.8 1.4-1.7 3-1.7 3.2 0 3.8 2.1 3.8 4.8V20h-3v-4.7c0-1.1 0-2.6-1.6-2.6s-1.9 1.2-1.9 2.5V20H9V10z" />
+    </svg>
+  );
+}
+
+function PinGlyph() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
+      <path d="M12 3a8 8 0 0 0-2.9 15.5c0-.7-.1-1.7.1-2.4l1.3-5.4s-.3-.7-.3-1.6c0-1.5.9-2.6 2-2.6.9 0 1.4.7 1.4 1.5 0 .9-.6 2.3-.9 3.5-.3 1.1.5 2 1.6 2 1.9 0 3.3-2 3.3-4.9 0-2.6-1.8-4.4-4.5-4.4a4.7 4.7 0 0 0-4.9 4.7c0 .9.4 1.9.8 2.5l.1.4-.4 1.4c-.1.2-.2.3-.4.2-1.5-.7-2.4-2.8-2.4-4.5 0-3.7 2.7-7.1 7.7-7.1 4 0 7.2 2.9 7.2 6.7 0 4-2.5 7.3-6 7.3-1.2 0-2.3-.6-2.7-1.3l-.7 2.8c-.3 1-1 2.2-1.5 3a8 8 0 1 0 2.1-15.6z" />
+    </svg>
   );
 }
 
