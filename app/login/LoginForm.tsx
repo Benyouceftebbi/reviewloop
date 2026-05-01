@@ -16,8 +16,10 @@
 */
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginForm() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -28,9 +30,16 @@ export default function LoginForm() {
     setSubmitting(true);
     // Auth integration goes here. We hold the spinner state for a
     // beat so the button doesn't flash before the route flips, which
-    // is also a nicer demo of the disabled state.
-    await new Promise((r) => setTimeout(r, 600));
-    setSubmitting(false);
+    // is also a nicer demo of the disabled state, then flip to the
+    // dashboard.
+    await new Promise((r) => setTimeout(r, 500));
+    router.push("/dashboard");
+  };
+
+  const onGoogle = async () => {
+    setSubmitting(true);
+    await new Promise((r) => setTimeout(r, 400));
+    router.push("/dashboard");
   };
 
   return (
@@ -146,7 +155,9 @@ export default function LoginForm() {
       {/* Google */}
       <button
         type="button"
-        className="inline-flex items-center justify-center gap-3 rounded-pill bg-white px-6 py-4 text-base font-medium text-canvas transition-all duration-300 hover:scale-[1.01] hover:bg-white/90"
+        onClick={onGoogle}
+        disabled={submitting}
+        className="inline-flex items-center justify-center gap-3 rounded-pill bg-white px-6 py-4 text-base font-medium text-canvas transition-all duration-300 hover:scale-[1.01] hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
       >
         <GoogleMark />
         Continue with Google
