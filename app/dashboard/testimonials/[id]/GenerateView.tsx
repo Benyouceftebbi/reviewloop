@@ -91,6 +91,9 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
   // Share-to-socials modal
   const [shareOpen, setShareOpen] = useState(false);
 
+  // Fullscreen preview modal
+  const [expandOpen, setExpandOpen] = useState(false);
+
   // Reset preview whenever the user changes anything that affects output.
   useEffect(() => {
     setProgress(0);
@@ -119,6 +122,8 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
   const isReady = progress >= 0.95;
   const brand = BRANDS[brandIdx] ?? BRANDS[0];
   const aspectMeta = ASPECTS.find((a) => a.id === aspect) ?? ASPECTS[0];
+  // Generic templates ship at a fixed 5:4; AI mode follows the chosen aspect.
+  const previewRatio = mode === "generic" ? 5 / 4 : aspectMeta.ratio;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6 px-5 py-8 md:px-8 md:py-10">
@@ -310,45 +315,87 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
             )}
           </div>
 
-          <div className="relative">
-            {mode === "generic" ? (
-              <CreativeCard brand={brand} testimonial={t.text} progress={progress} />
-            ) : (
-              <AICreativeCard
-                aspect={aspectMeta.ratio}
-                postType={postType}
-                testimonial={t.text}
-                progress={progress}
-              />
-            )}
+          {/*
+            Fixed-height preview frame.
 
-            {/* Empty state */}
-            {progress === 0 && !generating && (
-              <div
-                className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl text-center"
-                style={{
-                  backgroundColor: "rgba(10,10,15,0.55)",
-                  backdropFilter: "blur(2px)",
-                }}
-              >
-                <span
-                  aria-hidden
-                  className="flex h-10 w-10 items-center justify-center rounded-full"
+            The frame's height is locked to `clamp(320px, 52vh, 560px)`
+            so swapping the aspect ratio (1:1 → 9:16 etc.) never grows
+            the right column or pushes the Generate button below the
+            fold. The inner sizer keeps the chosen aspect by deriving
+            its width from the frame height and clamping at 100% width
+            for landscape ratios — height shrinks via aspect-ratio when
+            the width hits the cap.
+          */}
+          <div
+            className="relative flex w-full items-center justify-center"
+            style={{ height: "clamp(320px, 52vh, 560px)" }}
+          >
+            <div
+              className="relative"
+              style={{
+                height: "100%",
+                aspectRatio: previewRatio,
+                maxWidth: "100%",
+              }}
+            >
+              {mode === "generic" ? (
+                <CreativeCard brand={brand} testimonial={t.text} progress={progress} />
+              ) : (
+                <AICreativeCard
+                  aspect={aspectMeta.ratio}
+                  postType={postType}
+                  testimonial={t.text}
+                  progress={progress}
+                />
+              )}
+
+              {/* Expand to fullscreen — only meaningful once a creative exists */}
+              {isReady && (
+                <button
+                  type="button"
+                  onClick={() => setExpandOpen(true)}
+                  aria-label="Open preview at full size"
+                  className="group absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full border text-white/85 transition-all hover:scale-105 hover:text-white"
                   style={{
-                    backgroundColor: "rgba(197,248,42,0.12)",
-                    color: "var(--spec-lime)",
-                    boxShadow: "0 0 24px var(--lime-glow)",
+                    borderColor: "rgba(255,255,255,0.18)",
+                    backgroundColor: "rgba(10,12,18,0.35)",
+                    backdropFilter: "blur(14px)",
+                    WebkitBackdropFilter: "blur(14px)",
+                    boxShadow: "0 6px 20px rgba(0,0,0,0.35)",
                   }}
                 >
-                  <SparkleIcon />
-                </span>
-                <p className="text-[12px] text-white/70">
-                  {mode === "generic"
-                    ? "Pick a template, then generate."
-                    : "Pick a format & size, then generate."}
-                </p>
-              </div>
-            )}
+                  <ExpandIcon />
+                </button>
+              )}
+
+              {/* Empty state */}
+              {progress === 0 && !generating && (
+                <div
+                  className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-2 rounded-2xl text-center"
+                  style={{
+                    backgroundColor: "rgba(10,10,15,0.55)",
+                    backdropFilter: "blur(2px)",
+                  }}
+                >
+                  <span
+                    aria-hidden
+                    className="flex h-10 w-10 items-center justify-center rounded-full"
+                    style={{
+                      backgroundColor: "rgba(197,248,42,0.12)",
+                      color: "var(--spec-lime)",
+                      boxShadow: "0 0 24px var(--lime-glow)",
+                    }}
+                  >
+                    <SparkleIcon />
+                  </span>
+                  <p className="text-[12px] text-white/70">
+                    {mode === "generic"
+                      ? "Pick a template, then generate."
+                      : "Pick a format & size, then generate."}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Generate */}
@@ -406,6 +453,24 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
           author={t.author}
           onClose={() => setShareOpen(false)}
         />
+      )}
+
+      {expandOpen && (
+        <ExpandPreviewModal
+          ratio={previewRatio}
+          onClose={() => setExpandOpen(false)}
+        >
+          {mode === "generic" ? (
+            <CreativeCard brand={brand} testimonial={t.text} progress={1} />
+          ) : (
+            <AICreativeCard
+              aspect={aspectMeta.ratio}
+              postType={postType}
+              testimonial={t.text}
+              progress={1}
+            />
+          )}
+        </ExpandPreviewModal>
       )}
     </div>
   );
@@ -1227,6 +1292,111 @@ function ShareModal({ author, onClose }: { author: string; onClose: () => void }
 }
 
 /* ---------- Share / channel glyphs ---------- */
+
+function ExpandIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.8}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+    >
+      <path d="M4 9V4h5" />
+      <path d="M20 9V4h-5" />
+      <path d="M4 15v5h5" />
+      <path d="M20 15v5h-5" />
+    </svg>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Fullscreen preview modal                                            */
+/*                                                                     */
+/* Renders the rendered creative inside a viewport-sized stage. The    */
+/* stage is itself constrained to `min(92vw, 92vh * ratio)` so the     */
+/* card always fits both axes regardless of aspect. Close on Escape    */
+/* or backdrop click. Body scroll is locked while open.                */
+/* ------------------------------------------------------------------ */
+
+function ExpandPreviewModal({
+  ratio,
+  onClose,
+  children,
+}: {
+  ratio: number;
+  onClose: () => void;
+  children: ReactNode;
+}) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKey);
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prev;
+    };
+  }, [onClose]);
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Creative preview"
+      className="fixed inset-0 z-50 flex items-center justify-center px-4 py-6"
+    >
+      <button
+        type="button"
+        aria-label="Close preview"
+        onClick={onClose}
+        className="absolute inset-0 cursor-default"
+        style={{
+          backgroundColor: "rgba(5,6,10,0.78)",
+          backdropFilter: "blur(18px)",
+          WebkitBackdropFilter: "blur(18px)",
+        }}
+      />
+
+      {/* Close pill */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        className="absolute right-5 top-5 z-10 flex h-10 w-10 items-center justify-center rounded-full border text-white/85 transition-colors hover:bg-white/10 hover:text-white"
+        style={{
+          borderColor: "rgba(255,255,255,0.18)",
+          backgroundColor: "rgba(10,12,18,0.45)",
+          backdropFilter: "blur(14px)",
+          WebkitBackdropFilter: "blur(14px)",
+        }}
+      >
+        <CloseIcon />
+      </button>
+
+      {/* Stage — fits within the viewport on both axes */}
+      <div
+        className="relative"
+        style={{
+          width: `min(92vw, calc(86vh * ${ratio}))`,
+          aspectRatio: ratio,
+          maxHeight: "86vh",
+          boxShadow:
+            "0 40px 100px -20px rgba(0,0,0,0.7), 0 0 0 1px rgba(197,248,42,0.08), 0 0 80px -20px rgba(197,248,42,0.18)",
+          borderRadius: 24,
+          overflow: "hidden",
+        }}
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
 
 function ShareIcon() {
   return (
