@@ -51,6 +51,17 @@ export type Testimonial = {
    * the bars stay stable across renders without needing a real file.
    */
   waveform?: number[];
+
+  /**
+   * Optional pre-baked AI creative for this testimonial. When set, the
+   * AI-generate flow uses this image as the final output instead of
+   * the procedural canvas — what a real model run would produce for
+   * that brand. Authored at portrait 9:16; cover-cropped into the
+   * chosen aspect frame.
+   */
+  aiCreativeUrl?: string;
+  /** Short brand label shown in the loading toast & metadata. */
+  aiCreativeBrand?: string;
 };
 
 export const TESTIMONIALS: Testimonial[] = [
@@ -73,6 +84,8 @@ export const TESTIMONIALS: Testimonial[] = [
     postedAt: "2026-04-29T09:11:00Z",
     postContext: "Comment on 14.2k-view post",
     unread: true,
+    aiCreativeUrl: "/creatives/tirameup-masterclass.png",
+    aiCreativeBrand: "TiraMeUp",
   },
   {
     id: "t3",
@@ -94,6 +107,8 @@ export const TESTIMONIALS: Testimonial[] = [
     text: "obsessed obsessed obsessed. why did no one tell me about this brand sooner",
     postedAt: "2026-04-28T11:30:00Z",
     postContext: "Quote of @brand launch tweet",
+    aiCreativeUrl: "/creatives/touche-serum.jpg",
+    aiCreativeBrand: "Touché",
   },
   {
     id: "t5",
@@ -135,6 +150,8 @@ export const TESTIMONIALS: Testimonial[] = [
     handle: "chris@personal.com",
     text: "Just wanted to email and say thank you. I've tried 6 different products and yours is the only one my partner actually noticed a change with.",
     postedAt: "2026-04-26T13:55:00Z",
+    aiCreativeUrl: "/creatives/medicube-jelly.jpg",
+    aiCreativeBrand: "Medicube",
   },
   {
     id: "t9",

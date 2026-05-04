@@ -346,6 +346,8 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
                   postType={postType}
                   testimonial={t.text}
                   progress={progress}
+                  creativeUrl={t.aiCreativeUrl}
+                  creativeBrand={t.aiCreativeBrand}
                 />
               )}
 
@@ -468,6 +470,8 @@ export default function GenerateView({ testimonial: t }: { testimonial: Testimon
               postType={postType}
               testimonial={t.text}
               progress={1}
+              creativeUrl={t.aiCreativeUrl}
+              creativeBrand={t.aiCreativeBrand}
             />
           )}
         </ExpandPreviewModal>
@@ -718,12 +722,33 @@ function AICreativeCard({
   postType,
   testimonial,
   progress,
+  creativeUrl,
+  creativeBrand,
 }: {
   aspect: number;
   postType: PostType;
   testimonial: string;
   progress: number;
+  /** When set, AI mode renders this pre-baked image instead of the procedural canvas. */
+  creativeUrl?: string;
+  creativeBrand?: string;
 }) {
+  // Image-backed render — used when this testimonial has a real
+  // brand creative attached. The image fades in as progress grows
+  // and a final SPONSORED chip + ready glow lights up at completion
+  // so the generation animation still has the same beats.
+  if (creativeUrl) {
+    return (
+      <ImageCreativeCard
+        aspect={aspect}
+        postType={postType}
+        progress={progress}
+        creativeUrl={creativeUrl}
+        creativeBrand={creativeBrand}
+      />
+    );
+  }
+
   const v = BRAND_VIBE;
   const p = clamp(progress, 0, 1);
   const bgOpacity = clamp(p / 0.15, 0, 1);
@@ -854,6 +879,139 @@ function AICreativeCard({
           )}
         </div>
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Image-backed creative                                               */
+/*                                                                     */
+/* For testimonials that ship with a pre-baked AI creative we render   */
+/* the real artwork instead of the procedural canvas. The image fills  */
+/* the chosen aspect frame via object-cover so swapping ratios just    */
+/* re-crops, never scrolls. Generation beats are preserved: a scan     */
+/* line + lime sweep travels top→bottom while progress < 1, then a     */
+/* small brand pill + ready glow flash on at completion.               */
+/* ------------------------------------------------------------------ */
+
+function ImageCreativeCard({
+  aspect,
+  postType,
+  progress,
+  creativeUrl,
+  creativeBrand,
+}: {
+  aspect: number;
+  postType: PostType;
+  progress: number;
+  creativeUrl: string;
+  creativeBrand?: string;
+}) {
+  const p = clamp(progress, 0, 1);
+  // Image fades / desaturates while building, locks in clear at the end.
+  const reveal = clamp(p / 0.85, 0, 1);
+  const sweepY = `${clamp(p, 0, 1) * 100}%`;
+  const ready = p >= 0.95;
+
+  return (
+    <div
+      className="relative h-full w-full overflow-hidden rounded-2xl"
+      style={{
+        aspectRatio: `${aspect}`,
+        backgroundColor: "#0B0C10",
+        boxShadow: "0 12px 40px rgba(0,0,0,0.45)",
+      }}
+    >
+      {/* Real AI creative */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={creativeUrl}
+        alt={creativeBrand ? `${creativeBrand} creative` : "Generated creative"}
+        className="absolute inset-0 h-full w-full object-cover transition-[filter,opacity] duration-500"
+        style={{
+          opacity: 0.15 + 0.85 * reveal,
+          filter: ready
+            ? "saturate(1) blur(0)"
+            : `saturate(${0.4 + 0.6 * reveal}) blur(${(1 - reveal) * 8}px)`,
+        }}
+      />
+
+      {/* Scanline grain — same as procedural card so both feel like one system */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-overlay"
+        style={{
+          backgroundImage:
+            "repeating-linear-gradient(0deg, rgba(255,255,255,0.6) 0 1px, transparent 1px 3px)",
+        }}
+      />
+
+      {/* Lime build-line travelling top→bottom while generating */}
+      {!ready && (
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 h-px"
+          style={{
+            top: sweepY,
+            backgroundColor: "var(--spec-lime)",
+            boxShadow:
+              "0 0 12px var(--spec-lime), 0 0 32px rgba(197,248,42,0.5)",
+            opacity: p > 0 ? 0.9 : 0,
+            transition: "top 120ms linear",
+          }}
+        />
+      )}
+
+      {/* Top-left status chip */}
+      <div className="absolute left-3 top-3 flex items-center gap-2">
+        <span
+          className="rounded-full px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em]"
+          style={{
+            color: "var(--canvas)",
+            backgroundColor: ready ? "var(--spec-lime)" : "rgba(255,255,255,0.85)",
+            boxShadow: ready ? "0 0 18px var(--lime-glow)" : "none",
+            transition: "all 200ms var(--ease-reveal)",
+          }}
+        >
+          {ready ? "✓ ready" : "// ai · rendering"}
+        </span>
+        {postType === "ad" && ready && (
+          <span
+            className="rounded-full px-2 py-0.5 font-mono text-[9px] uppercase tracking-[0.2em]"
+            style={{
+              color: "#1A1A1A",
+              backgroundColor: "rgba(255,255,255,0.92)",
+            }}
+          >
+            sponsored
+          </span>
+        )}
+      </div>
+
+      {/* Bottom-right brand watermark — small + transparent so it never crowds */}
+      {creativeBrand && (
+        <div
+          className="absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full border px-2.5 py-1 font-mono text-[9px] uppercase tracking-[0.22em]"
+          style={{
+            color: "rgba(255,255,255,0.95)",
+            borderColor: "rgba(255,255,255,0.25)",
+            backgroundColor: "rgba(10,12,18,0.45)",
+            backdropFilter: "blur(10px)",
+            WebkitBackdropFilter: "blur(10px)",
+            opacity: clamp((p - 0.6) / 0.3, 0, 1),
+          }}
+        >
+          <span
+            aria-hidden
+            className="h-1 w-1 rounded-full"
+            style={{
+              backgroundColor: "var(--spec-lime)",
+              boxShadow: "0 0 6px var(--spec-lime)",
+            }}
+          />
+          {creativeBrand}
+        </div>
+      )}
     </div>
   );
 }
