@@ -255,7 +255,7 @@ export default function Hero() {
             exactly what they're signing up for.
           */}
           <div className="flex flex-col items-center gap-3 md:items-end">
-            <a href="/login" className="group flex items-center gap-1">
+            <a href="/waitlist" className="group flex items-center gap-1">
               {/* Arrow circle — bigger now (h-16 vs old h-14), tighter gap to pill. */}
               <span className="relative grid h-16 w-16 place-items-center overflow-hidden rounded-full bg-lime text-canvas transition-colors duration-300 group-hover:bg-white">
                 {/*

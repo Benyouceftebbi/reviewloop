@@ -315,7 +315,7 @@ function Mote({
 function ConnectPill() {
   return (
     <a
-      href="/login"
+      href="/waitlist"
       className="group relative inline-flex items-center rounded-full py-2 pl-2 pr-6 md:pr-8 animate-cta-pulse transition-colors duration-300 hover:bg-white"
       style={{ backgroundColor: "var(--spec-lime)", color: "#1A1A1A" }}
     >

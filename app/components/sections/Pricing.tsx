@@ -269,7 +269,7 @@ function FreeHero({ inView }: { inView: boolean }) {
             up an inconsistent voice with the hero/navbar/final CTA.
           */}
           <a
-            href="/login"
+            href="/waitlist"
             className="inline-flex items-center justify-center gap-3 rounded-full px-8 py-5 text-base font-medium transition-transform duration-300 hover:scale-[1.02] md:text-lg"
             style={{
               backgroundColor: "var(--spec-lime)",
@@ -406,7 +406,7 @@ function CtaButton({
   if (style === "filled") {
     return (
       <a
-        href="/login"
+        href="/waitlist"
         className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 font-medium transition-transform duration-300 hover:scale-[1.02]"
         style={{
           backgroundColor: "var(--spec-lime)",
@@ -422,7 +422,7 @@ function CtaButton({
   if (style === "outline") {
     return (
       <a
-        href="/login"
+        href="/waitlist"
         className="inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3 font-medium transition-colors duration-300"
         style={{
           color: "var(--spec-lime)",
