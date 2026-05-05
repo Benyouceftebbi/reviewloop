@@ -146,7 +146,7 @@ export default function Navbar() {
 function SignInPill() {
   return (
     <a
-      href="/login"
+      href="/waitlist"
       className="group relative flex items-center gap-2 overflow-hidden rounded-pill bg-white px-4 py-2 text-canvas md:gap-3 md:px-6 md:py-3"
     >
       <span
@@ -206,7 +206,7 @@ function MobilePanel({
             every other primary action on the site. */}
         <div className="border-t border-canvas/8 p-4">
           <a
-            href="/login"
+            href="/waitlist"
             onClick={onLinkTap}
             className="flex items-center justify-between rounded-pill bg-canvas px-5 py-3 text-white transition-colors hover:bg-lime hover:text-canvas"
           >
