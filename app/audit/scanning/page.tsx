@@ -15,7 +15,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 
 const SCAN_DURATION_MS = 2 * 60 * 1000; // 2 minutes
 
-// Status messages that appear during the scan
+// Status messages that appear during the scan (small log)
 const STATUS_MESSAGES = [
   { at: 0, text: "Connecting to Instagram API..." },
   { at: 3, text: "Authenticating scan request..." },
@@ -38,23 +38,109 @@ const STATUS_MESSAGES = [
   { at: 115, text: "Report ready! Redirecting..." },
 ];
 
+/*
+  Live findings — surface "real" intermediate discoveries from the scan
+  to replace the abstract countdown timer. These are bigger, more
+  emotional, and tied to specific moments rather than a clock ticking
+  down. Each finding has a kind so the UI can render the right shape:
+    - count   : "Just found 12 high-quality reviews from May 2026"
+    - quote   : "Top review so far: 'this serum literally changed my skin'"
+    - value   : "Estimated value so far: $1,200... and counting"
+*/
+type Finding =
+  | { at: number; kind: "count"; label: string; value: string; sub: string }
+  | { at: number; kind: "quote"; label: string; value: string; sub: string }
+  | { at: number; kind: "value"; label: string; value: string; sub: string };
+
+const FINDINGS: Finding[] = [
+  {
+    at: 4,
+    kind: "count",
+    label: "Just found",
+    value: "12 high-quality reviews",
+    sub: "from May 2026",
+  },
+  {
+    at: 18,
+    kind: "count",
+    label: "Just found",
+    value: "47 reviews",
+    sub: "across recent posts",
+  },
+  {
+    at: 32,
+    kind: "quote",
+    label: "Top review so far",
+    value: "\u201CThis serum literally changed my skin in 2 weeks.\u201D",
+    sub: "@anon_customer · 142 likes",
+  },
+  {
+    at: 50,
+    kind: "value",
+    label: "Estimated value so far",
+    value: "$1,200",
+    sub: "...and counting",
+  },
+  {
+    at: 64,
+    kind: "count",
+    label: "Just found",
+    value: "134 potential reviews",
+    sub: "in tagged posts and DMs",
+  },
+  {
+    at: 78,
+    kind: "quote",
+    label: "Top review so far",
+    value: "\u201CMy friends keep asking what I'm using. Best purchase ever.\u201D",
+    sub: "@anon_customer · 89 likes",
+  },
+  {
+    at: 92,
+    kind: "value",
+    label: "Estimated value so far",
+    value: "$4,800",
+    sub: "...and counting",
+  },
+  {
+    at: 105,
+    kind: "count",
+    label: "Final tally",
+    value: "247 unused reviews",
+    sub: "ranked and ready",
+  },
+  {
+    at: 112,
+    kind: "value",
+    label: "Total estimated value",
+    value: "$7,400",
+    sub: "in unused content",
+  },
+];
+
 export default function ScanningPage() {
   const router = useRouter();
   const [handle, setHandle] = useState("");
+  const [email, setEmail] = useState("");
   const [timeLeft, setTimeLeft] = useState(SCAN_DURATION_MS);
   const [visibleMessages, setVisibleMessages] = useState<string[]>([]);
+  // Index into FINDINGS for the currently-displayed live finding card.
+  // -1 means we haven't surfaced a finding yet (first few seconds).
+  const [findingIdx, setFindingIdx] = useState<number>(-1);
   const startTimeRef = useRef<number>(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Get handle from session storage
+  // Get handle + email from session storage
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const stored = sessionStorage.getItem("audit_handle");
-      if (stored) setHandle(stored);
+      const storedHandle = sessionStorage.getItem("audit_handle");
+      const storedEmail = sessionStorage.getItem("audit_email");
+      if (storedHandle) setHandle(storedHandle);
+      if (storedEmail) setEmail(storedEmail);
     }
   }, []);
 
-  // Timer countdown and status message progression
+  // Timer countdown, status message progression, and findings progression
   useEffect(() => {
     startTimeRef.current = Date.now();
     let lastMessageIndex = -1;
@@ -67,7 +153,7 @@ export default function ScanningPage() {
       // Add new status messages based on elapsed seconds
       const elapsedSec = Math.floor(elapsed / 1000);
       const newMessages: string[] = [];
-      
+
       STATUS_MESSAGES.forEach((msg, idx) => {
         if (msg.at <= elapsedSec && idx > lastMessageIndex) {
           newMessages.push(msg.text);
@@ -79,10 +165,16 @@ export default function ScanningPage() {
         setVisibleMessages((prev) => [...prev, ...newMessages]);
       }
 
+      // Surface the most recent finding whose `at` we've passed.
+      let nextFindingIdx = -1;
+      for (let i = 0; i < FINDINGS.length; i++) {
+        if (FINDINGS[i].at <= elapsedSec) nextFindingIdx = i;
+      }
+      setFindingIdx((prev) => (prev !== nextFindingIdx ? nextFindingIdx : prev));
+
       // Redirect when complete
       if (remaining <= 0) {
         clearInterval(interval);
-        // Navigate to results (placeholder for now)
         router.push("/audit/results");
       }
     }, 100);
@@ -95,9 +187,8 @@ export default function ScanningPage() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [visibleMessages]);
 
-  const minutes = Math.floor(timeLeft / 60000);
-  const seconds = Math.floor((timeLeft % 60000) / 1000);
   const progress = 1 - timeLeft / SCAN_DURATION_MS;
+  const finding = findingIdx >= 0 ? FINDINGS[findingIdx] : null;
 
   return (
     <main
@@ -159,24 +250,67 @@ export default function ScanningPage() {
                 </div>
               </div>
 
-              {/* Big countdown timer */}
-              <div className="mb-8 text-center">
+              {/*
+                Live findings card — replaces the abstract countdown timer
+                with concrete, scan-tied highlights. Each finding fades in
+                via a re-keyed wrapper so the same DOM node animates fresh
+                whenever `findingIdx` changes.
+              */}
+              <div
+                key={findingIdx}
+                className="mb-8 rounded-2xl border p-6"
+                style={{
+                  borderColor: "var(--border-subtle)",
+                  backgroundColor: "var(--bg-elevated)",
+                  animation: "fadeSlideIn 0.4s ease-out",
+                  minHeight: 132,
+                }}
+              >
                 <p
-                  className="mb-2 font-mono text-[10px] uppercase tracking-[0.22em]"
-                  style={{ color: "var(--text-dim)" }}
+                  className="font-mono text-[10px] uppercase tracking-[0.22em]"
+                  style={{ color: "var(--spec-lime)" }}
                 >
-                  Time remaining
+                  // {finding ? finding.label : "Warming up the scanner"}
                 </p>
-                <div className="flex items-center justify-center gap-4">
-                  <TimeBlock value={minutes} label="min" />
-                  <span
-                    className="text-4xl font-light"
-                    style={{ color: "var(--spec-lime)" }}
+                {finding ? (
+                  <>
+                    {finding.kind === "quote" ? (
+                      <p className="mt-3 text-[18px] font-medium leading-snug text-white">
+                        {finding.value}
+                      </p>
+                    ) : (
+                      <p
+                        className={`mt-3 font-bold leading-tight text-white ${
+                          finding.kind === "value"
+                            ? "text-[34px] tabular-nums"
+                            : "text-[26px]"
+                        }`}
+                      >
+                        {finding.kind === "value" ? (
+                          <span style={{ color: "var(--spec-lime)" }}>
+                            {finding.value}
+                          </span>
+                        ) : (
+                          finding.value
+                        )}
+                      </p>
+                    )}
+                    <p
+                      className="mt-2 text-[13px]"
+                      style={{ color: "var(--text-muted)" }}
+                    >
+                      {finding.sub}
+                    </p>
+                  </>
+                ) : (
+                  <p
+                    className="mt-3 text-[15px]"
+                    style={{ color: "var(--text-muted)" }}
                   >
-                    :
-                  </span>
-                  <TimeBlock value={seconds} label="sec" />
-                </div>
+                    Connecting to @{handle || "yourbrand"} — first findings
+                    coming up in a few seconds.
+                  </p>
+                )}
               </div>
 
               {/* Progress bar */}
@@ -285,10 +419,14 @@ export default function ScanningPage() {
               </div>
 
               <p
-                className="mt-6 text-center text-[13px]"
+                className="mt-6 text-center text-[13px] leading-relaxed"
                 style={{ color: "var(--text-dim)" }}
               >
-                Please keep this page open while we analyze your account.
+                We&apos;ll email your full report to{" "}
+                <span className="text-white">
+                  {email || "you@company.com"}
+                </span>{" "}
+                when it&apos;s ready — you can close this tab anytime.
               </p>
             </div>
           </div>
@@ -327,31 +465,6 @@ export default function ScanningPage() {
         }
       `}</style>
     </main>
-  );
-}
-
-/* ---------- Time Block ---------- */
-function TimeBlock({ value, label }: { value: number; label: string }) {
-  return (
-    <div className="text-center">
-      <div
-        className="flex h-20 w-20 items-center justify-center rounded-2xl border text-4xl font-bold tabular-nums"
-        style={{
-          borderColor: "var(--border-subtle)",
-          backgroundColor: "var(--bg-elevated)",
-          color: "var(--spec-lime)",
-          boxShadow: "0 0 30px rgba(197,248,42,0.08)",
-        }}
-      >
-        {String(value).padStart(2, "0")}
-      </div>
-      <p
-        className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em]"
-        style={{ color: "var(--text-dim)" }}
-      >
-        {label}
-      </p>
-    </div>
   );
 }
 
