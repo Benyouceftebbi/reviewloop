@@ -4,55 +4,92 @@
   AuditCommentsMarquee
   --------------------
 
-  A low-opacity background marquee that scrolls horizontally right-to-left
-  beneath the audit hero. Each tile is a "comment → creative" pair: a raw
-  Instagram-style comment card on the left, an arrow, a finished branded
-  creative card on the right — visually summarising the product promise.
+  A low-opacity background marquee that fills the entire hero with
+  three stacked horizontal rows of "comment → creative" pair tiles:
+
+    Row 1 — scrolls left  (slow)
+    Row 2 — scrolls right (medium, reversed)
+    Row 3 — scrolls left  (medium)
+
+  Each tile is a raw IG-style comment card, an arrow, and a finished
+  branded creative card — visually summarising the product promise.
 
   Implementation:
-    - One single track containing the pair tiles TWICE in sequence.
-    - The track translates from 0 to -50% on a CSS keyframe (defined in
-      globals.css as `audit-marquee-track`). Because the duplicate sits
-      flush at the end of the first run, the loop is seamless.
-    - The track sits inside a viewport with horizontal mask-fade so the
-      tiles dissolve at both edges instead of clipping hard.
-    - The whole component is `pointer-events-none` and absolutely
-      positioned so it never intercepts clicks on the hero copy/CTA.
-
-  This is a *background* element only — the hero copy renders above it
-  with z-10. Keep opacity around 0.18 so the gradient backgrounds and
-  tokens stay readable.
+    - Each row contains the pair tiles TWICE in sequence; the keyframe
+      translates the track -50% (or +50% for the reversed row), so the
+      duplicate sits flush at the wrap point and the loop is seamless.
+    - Rows are stacked with `flex-col` and `justify-between` inside a
+      vertically-padded full-height viewport so they spread across the
+      whole hero, not a single line.
+    - The viewport has both horizontal AND vertical mask-fade so tiles
+      dissolve at the edges rather than clipping hard against the
+      hero's CTA / copy.
+    - Each row uses a different archetype offset so adjacent rows
+      don't show identical tiles stacked on top of each other.
+    - Whole component is `pointer-events-none` and absolutely
+      positioned — never intercepts clicks on the hero.
 */
 
 import { ARCHETYPES } from "@/app/components/sections/_showcaseData";
 
+// Rotate the archetype list so each row starts at a different tile,
+// preventing visible vertical "columns" of identical pairs.
+function rotate<T>(arr: T[], n: number): T[] {
+  const k = ((n % arr.length) + arr.length) % arr.length;
+  return [...arr.slice(k), ...arr.slice(0, k)];
+}
+
 export default function AuditCommentsMarquee() {
-  // Each archetype yields one comment → creative pair tile. We render
-  // the tiles twice in sequence so the keyframe can translate -50%
-  // and seamlessly wrap.
-  const tiles = [...ARCHETYPES, ...ARCHETYPES];
+  const row1 = [...ARCHETYPES, ...ARCHETYPES];
+  const row2 = [...rotate(ARCHETYPES, 2), ...rotate(ARCHETYPES, 2)];
+  const row3 = [...rotate(ARCHETYPES, 4), ...rotate(ARCHETYPES, 4)];
 
   return (
     <div
       aria-hidden
       className="pointer-events-none absolute inset-0 overflow-hidden"
       style={{
-        // Soft horizontal fade at both edges so cards dissolve instead
-        // of clipping hard against the section bounds.
+        // Soft fade at all four edges so cards dissolve into the hero
+        // background instead of clipping hard against the section.
         WebkitMaskImage:
-          "linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%)",
+          "linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%)",
+        WebkitMaskComposite: "source-in",
         maskImage:
-          "linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%)",
+          "linear-gradient(90deg, transparent 0%, #000 8%, #000 92%, transparent 100%), linear-gradient(180deg, transparent 0%, #000 12%, #000 88%, transparent 100%)",
+        maskComposite: "intersect",
       }}
     >
       <div
-        className="audit-marquee-track flex h-full w-max items-center gap-6 px-6"
-        style={{ opacity: 0.18 }}
+        className="flex h-full flex-col justify-between py-6"
+        style={{ opacity: 0.16 }}
       >
-        {tiles.map((a, i) => (
-          <PairTile key={`${a.id}-${i}`} archetype={a} />
-        ))}
+        <Row tiles={row1} variant="slow" />
+        <Row tiles={row2} variant="reverse" />
+        <Row tiles={row3} variant="default" />
       </div>
+    </div>
+  );
+}
+
+function Row({
+  tiles,
+  variant,
+}: {
+  tiles: { id: string; quote: string; handle: string; label: string }[];
+  variant: "default" | "slow" | "reverse";
+}) {
+  const trackClass =
+    variant === "slow"
+      ? "audit-marquee-track-slow"
+      : variant === "reverse"
+        ? "audit-marquee-track-reverse"
+        : "audit-marquee-track";
+
+  return (
+    <div className={`${trackClass} flex w-max items-center gap-6 px-6`}>
+      {tiles.map((a, i) => (
+        <PairTile key={`${a.id}-${i}`} archetype={a} />
+      ))}
     </div>
   );
 }

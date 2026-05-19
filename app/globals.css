@@ -173,10 +173,24 @@ html.lenis body {
   from { transform: translate3d(0, 0, 0); }
   to   { transform: translate3d(-50%, 0, 0); }
 }
+@keyframes auditMarqueeReverse {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
 .audit-marquee-track {
   animation: auditMarquee 60s linear infinite;
   will-change: transform;
 }
+.audit-marquee-track-slow {
+  animation: auditMarquee 90s linear infinite;
+  will-change: transform;
+}
+.audit-marquee-track-reverse {
+  animation: auditMarqueeReverse 75s linear infinite;
+  will-change: transform;
+}
 @media (prefers-reduced-motion: reduce) {
-  .audit-marquee-track { animation: none; }
+  .audit-marquee-track,
+  .audit-marquee-track-slow,
+  .audit-marquee-track-reverse { animation: none; }
 }
