@@ -13,7 +13,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 /*    RIGHT — TransformShowcase animation (comments → creatives)       */
 /* ================================================================== */
 
-const SCAN_DURATION_MS = 2 * 60 * 1000; // 2 minutes
+const SCAN_DURATION_MS = 30 * 1000; // 2 minutes
 
 // Status messages that appear during the scan (small log)
 const STATUS_MESSAGES = [
@@ -280,11 +280,10 @@ export default function ScanningPage() {
                       </p>
                     ) : (
                       <p
-                        className={`mt-3 font-bold leading-tight text-white ${
-                          finding.kind === "value"
+                        className={`mt-3 font-bold leading-tight text-white ${finding.kind === "value"
                             ? "text-[34px] tabular-nums"
                             : "text-[26px]"
-                        }`}
+                          }`}
                       >
                         {finding.kind === "value" ? (
                           <span style={{ color: "var(--spec-lime)" }}>
