@@ -3,6 +3,8 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import AuditCommentsMarquee from "./_components/AuditCommentsMarquee";
+import AuditReplay from "./_components/AuditReplay";
 
 /* ================================================================== */
 /*  /audit — Hormozi-style squeeze page                                */
@@ -105,8 +107,13 @@ function HeroSection() {
   };
 
   return (
-    <section className="px-4 pb-20 pt-8 md:px-8">
-      <div className="mx-auto max-w-5xl">
+    <section className="relative overflow-hidden px-4 pb-20 pt-8 md:px-8">
+      {/* Background marquee — comments → branded creatives, scrolling
+          right-to-left at low opacity. Pointer-events disabled so it
+          never intercepts clicks on the hero copy/CTA. */}
+      <AuditCommentsMarquee />
+
+      <div className="relative z-10 mx-auto max-w-5xl">
         {/* Pre-headline */}
         <p
           className="mb-4 font-mono text-[11px] uppercase tracking-[0.22em]"
@@ -416,7 +423,13 @@ function HowItWorksSection() {
           3 steps. 60 seconds. Done.
         </h2>
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-3">
+        {/* Replay cinematic — visually shows the comment → creative
+            transformation that the steps describe. */}
+        <div className="mt-12">
+          <AuditReplay />
+        </div>
+
+        <div className="mt-16 grid gap-8 sm:grid-cols-3">
           {steps.map((s) => (
             <div key={s.num} className="text-left">
               <span

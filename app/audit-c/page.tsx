@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import AuditCommentsMarquee from "../audit/_components/AuditCommentsMarquee";
+import AuditReplay from "../audit/_components/AuditReplay";
 
 /* ================================================================== */
 /*  /audit-c — VERSION C — Free Review Audit for indie DTC skincare    */
@@ -33,6 +35,7 @@ export default function AuditCPage() {
       </header>
 
       <HeroSection />
+      <HowItWorksSection />
     </main>
   );
 }
@@ -57,8 +60,13 @@ function HeroSection() {
   };
 
   return (
-    <section className="px-4 pb-24 pt-4 md:px-8">
-      <div className="mx-auto max-w-5xl">
+    <section className="relative overflow-hidden px-4 pb-24 pt-4 md:px-8">
+      {/* Background marquee — comments → branded creatives, scrolling
+          right-to-left at low opacity. Pointer-events disabled so it
+          never intercepts clicks on the hero copy/CTA. */}
+      <AuditCommentsMarquee />
+
+      <div className="relative z-10 mx-auto max-w-5xl">
         {/* Variant tag */}
         <p
           className="mb-3 font-mono text-[11px] uppercase tracking-[0.22em]"
@@ -231,6 +239,84 @@ function HeroSection() {
             number in 60 seconds.
           </p>
         </form>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* How it works — replay cinematic + 3-step strip                      */
+/* ------------------------------------------------------------------ */
+
+function HowItWorksSection() {
+  const steps = [
+    {
+      num: "01",
+      title: "Drop your handle",
+      desc: "Just your public Instagram @handle — no login, no card.",
+    },
+    {
+      num: "02",
+      title: "We rank every review",
+      desc: "Your last 90 days of comments and DMs, scored for content quality.",
+    },
+    {
+      num: "03",
+      title: "See what they're worth",
+      desc: "Top 10 reviews + estimated designer cost — back in 60 seconds.",
+    },
+  ];
+
+  return (
+    <section
+      className="border-t px-4 py-20 md:px-8"
+      style={{ borderColor: "var(--border-subtle)" }}
+    >
+      <div className="mx-auto max-w-4xl text-center">
+        <p
+          className="font-mono text-[11px] uppercase tracking-[0.22em]"
+          style={{ color: "var(--spec-lime)" }}
+        >
+          How it works
+        </p>
+        <h2 className="mt-3 text-balance text-[clamp(1.6rem,4vw,2.2rem)] font-bold leading-[1.1] text-white">
+          From a customer comment to a branded ad,{" "}
+          <span
+            className="font-display italic font-normal"
+            style={{ color: "var(--purple-soft)" }}
+          >
+            in four seconds.
+          </span>
+        </h2>
+
+        {/* Replay cinematic — the same comment-to-creative morph from
+            the landing page, embedded above the 3-step strip. */}
+        <div className="mt-12">
+          <AuditReplay />
+        </div>
+
+        {/* 3-step strip below the replay. */}
+        <div className="mt-16 grid gap-8 sm:grid-cols-3">
+          {steps.map((s) => (
+            <div key={s.num} className="text-left">
+              <span
+                className="font-mono text-[11px] tracking-[0.22em]"
+                style={{ color: "var(--spec-lime)" }}
+              >
+                Step {s.num}
+              </span>
+              <p className="mt-2 text-[18px] font-semibold text-white">
+                {s.title}
+              </p>
+              <p
+                className="mt-1 text-[14px] leading-relaxed"
+                style={{ color: "var(--text-muted)" }}
+              >
+                {s.desc}
+              </p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
