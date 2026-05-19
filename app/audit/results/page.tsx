@@ -537,7 +537,10 @@ function DmTeaserSection({ totalComments }: { totalComments: number }) {
           className="mt-6 text-[14px] leading-relaxed"
           style={{ color: "var(--text-muted)" }}
         >
-          Founding members unlock DM scanning at launch.
+          Unlock with your $1 founding spot below{" "}
+          <span aria-hidden style={{ color: "var(--spec-lime)" }}>
+            ↓
+          </span>
         </p>
       </div>
     </section>
@@ -579,8 +582,45 @@ function StakesSection({
 }
 
 /* ================================================================== */
-/*  Section 6 — Founding Member offer (CTA)                            */
+/*  Section 6 — $1 Founding Member offer + Launch Countdown            */
 /* ================================================================== */
+
+/*
+  Launch date is a hardcoded ISO timestamp — same for every visitor,
+  NOT a per-visit fake timer. Today is 5/19/2026, so we set launch to
+  exactly 7 days out at 09:00 UTC. When the spec's backend lands this
+  becomes a config var (LAUNCH_DATE), but the timer behavior is
+  identical: tick every second, freeze at zero, flip CTA + label.
+*/
+const LAUNCH_DATE = "2026-05-26T09:00:00Z";
+const FOUNDING_MEMBER_CAP = 50;
+const ULTIMATE_TIER_PRICE_DISPLAY = 199;
+
+/*
+  Spots claimed is hardcoded for the v0 build (per spec: "Stubbed for
+  v0 — acceptable. Do NOT fake-decrement"). Replace with a real
+  /api/founding-stats call once the DB is wired.
+*/
+const SPOTS_CLAIMED_STUB = 18;
+
+interface TimeLeft {
+  total: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+}
+
+function calculateTimeLeft(launchDate: string): TimeLeft {
+  const total = new Date(launchDate).getTime() - Date.now();
+  return {
+    total,
+    days: Math.max(0, Math.floor(total / (1000 * 60 * 60 * 24))),
+    hours: Math.max(0, Math.floor((total / (1000 * 60 * 60)) % 24)),
+    minutes: Math.max(0, Math.floor((total / 1000 / 60) % 60)),
+    seconds: Math.max(0, Math.floor((total / 1000) % 60)),
+  };
+}
 
 function FoundingMemberSection({
   handle,
@@ -589,33 +629,61 @@ function FoundingMemberSection({
   handle: string;
   email: string;
 }) {
-  const totalSpots = 50;
-  const claimed = 18;
-  const remaining = totalSpots - claimed;
+  const remaining = FOUNDING_MEMBER_CAP - SPOTS_CLAIMED_STUB;
 
-  // Modal + thank-you state.
-  const [open, setOpen] = useState(false);
+  /*
+    Initialize timeLeft to null on the server so SSR never renders a
+    countdown that immediately mismatches when the client hydrates.
+    First useEffect tick fills it in.
+  */
+  const [timeLeft, setTimeLeft] = useState<TimeLeft | null>(null);
   const [submitted, setSubmitted] = useState(false);
-  const [spend, setSpend] = useState<string | null>(null);
 
-  const handleSubmit = (value: string) => {
-    setSpend(value);
-    // Stub: in production, POST { handle, email, spend } to /api/waitlist.
+  useEffect(() => {
+    setTimeLeft(calculateTimeLeft(LAUNCH_DATE));
+    const interval = setInterval(() => {
+      const next = calculateTimeLeft(LAUNCH_DATE);
+      setTimeLeft(next);
+      if (next.total <= 0) clearInterval(interval);
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const launched = timeLeft !== null && timeLeft.total <= 0;
+
+  const handleClaim = () => {
+    /*
+      Stripe integration intentionally skipped per the user's request.
+      In production this POSTs to /api/founding/checkout, which creates
+      a one-time `mode: "payment"` Stripe Checkout session for $1 (NOT
+      a subscription — auto-renewal would trigger chargebacks) and
+      returns a redirect URL. For now, just flip into the confirmed
+      state so the founding-confirmed UI is reachable end-to-end.
+    */
     setSubmitted(true);
   };
 
   const benefits = [
-    "Lifetime 50% off ($24/mo, not $49)",
-    "Skip the public launch waitlist",
-    "1:1 onboarding call with founder",
-    "First 10 creatives made by us, free",
+    "Unlimited AI creative generation",
+    "Full Meta + Shopify + Trustpilot integration",
+    "Custom brand kit (logo, colors, fonts)",
+    "DM scanning (the locked section above)",
+    "Auto-posting to Instagram + Facebook",
+    "Priority support — direct line to founder",
+    "Analytics dashboard",
   ];
 
+  /* ---------------- Confirmed (post-claim) state ---------------- */
   if (submitted) {
+    const spotNumber = SPOTS_CLAIMED_STUB + 1;
+    const launchPretty = new Date(LAUNCH_DATE).toLocaleDateString("en-US", {
+      month: "long",
+      day: "numeric",
+    });
     return (
       <section className="py-16">
         <div
-          className="rounded-3xl border p-8 text-center"
+          className="rounded-3xl border p-8 text-center sm:p-10"
           style={{
             borderColor: "rgba(197,248,42,0.3)",
             backgroundColor: "var(--bg-elevated)",
@@ -623,71 +691,29 @@ function FoundingMemberSection({
               "0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(197,248,42,0.1), 0 0 60px -20px rgba(197,248,42,0.18)",
           }}
         >
-          <SectionLabel>// SPOT RESERVED</SectionLabel>
-          <h3 className="mt-3 text-balance text-[clamp(1.4rem,4vw,1.8rem)] font-bold text-white">
-            You&apos;re in. Welcome to the founding 50.
+          <SectionLabel>// YOU&apos;RE IN</SectionLabel>
+          <h3 className="mt-3 text-balance text-[clamp(1.6rem,4vw,2rem)] font-bold text-white">
+            Spot #{spotNumber} secured for{" "}
+            <span style={{ color: "var(--spec-lime)" }}>
+              @{handle || "yourbrand"}
+            </span>
           </h3>
           <p
-            className="mx-auto mt-3 max-w-md text-[15px] leading-relaxed"
+            className="mx-auto mt-4 max-w-md text-[15px] leading-relaxed"
             style={{ color: "var(--text-muted)" }}
           >
-            We&apos;ll email{" "}
-            <span className="text-white">{email || "you"}</span> when your
-            access is ready and book your onboarding call.
+            We&apos;ll email you at{" "}
+            <span className="text-white">
+              {email || "your inbox"}
+            </span>{" "}
+            on launch day ({launchPretty}) with login details.
           </p>
-        </div>
-      </section>
-    );
-  }
 
-  return (
-    <>
-      <section className="py-16">
-        <div
-          className="rounded-3xl border p-8"
-          style={{
-            borderColor: "rgba(197,248,42,0.25)",
-            backgroundColor: "var(--bg-elevated)",
-            boxShadow:
-              "0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(197,248,42,0.08), 0 0 60px -20px rgba(197,248,42,0.18)",
-          }}
-        >
-          <div className="text-center">
-            <SectionLabel>// FOUNDING MEMBER ACCESS</SectionLabel>
-            <p
-              className="mt-3 font-mono text-[12px] uppercase tracking-[0.2em]"
-              style={{ color: "var(--text-muted)" }}
-            >
-              First {totalSpots} brands ·{" "}
-              <span className="text-white">{claimed} spots claimed</span> ·{" "}
-              <span style={{ color: "var(--spec-lime)" }}>
-                {remaining} left
-              </span>
-            </p>
-          </div>
-
-          <ul className="mx-auto mt-8 max-w-md space-y-3">
-            {benefits.map((b) => (
-              <li key={b} className="flex items-start gap-3 text-[15px]">
-                <span
-                  aria-hidden
-                  className="mt-1 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
-                  style={{
-                    backgroundColor: "rgba(197,248,42,0.15)",
-                    color: "var(--spec-lime)",
-                  }}
-                >
-                  <CheckIcon />
-                </span>
-                <span className="text-white/90">{b}</span>
-              </li>
-            ))}
-          </ul>
-
-          <div className="mx-auto mt-8 max-w-md">
-            <button
-              type="button"
-              onClick={() => setOpen(true)}
+          <div className="mx-auto mt-8 max-w-sm">
+            <Link
+              href="https://calendly.com/"
+              target="_blank"
+              rel="noreferrer"
               className="block w-full rounded-full px-6 py-4 text-center text-[15px] font-semibold transition-transform hover:scale-[1.01]"
               style={{
                 backgroundColor: "var(--spec-lime)",
@@ -695,116 +721,225 @@ function FoundingMemberSection({
                 boxShadow: "0 0 40px -10px rgba(197,248,42,0.5)",
               }}
             >
-              Reserve my founding spot
-            </button>
+              Book your onboarding call →
+            </Link>
             <p
               className="mt-3 text-center text-[12px] leading-relaxed"
               style={{ color: "var(--text-dim)" }}
             >
-              One quick question, then you&apos;re in. We never charge without
-              consent.
+              Optional — first 50 get a 1:1 with the founder.
             </p>
+          </div>
+
+          <div
+            className="mx-auto mt-8 max-w-md border-t pt-6 text-left text-[14px] leading-relaxed"
+            style={{
+              borderColor: "var(--border-subtle)",
+              color: "var(--text-muted)",
+            }}
+          >
+            <p>
+              In the meantime, your audit report is in your inbox. Reply if
+              you have any questions — I read every email.
+            </p>
+            <p className="mt-3 text-white">— Ben</p>
           </div>
         </div>
       </section>
+    );
+  }
 
-      {open && (
-        <QualifierModal
-          onClose={() => setOpen(false)}
-          onSubmit={handleSubmit}
-          handle={handle}
-        />
-      )}
-      {/* Suppress unused-var warning in dev */}
-      <span className="hidden">{spend}</span>
-    </>
-  );
-}
-
-/* ---------- Qualifier modal ---------- */
-
-function QualifierModal({
-  onClose,
-  onSubmit,
-  handle,
-}: {
-  onClose: () => void;
-  onSubmit: (value: string) => void;
-  handle: string;
-}) {
-  const options = ["$0", "$1–500", "$500–2,000", "$2,000+"];
-
+  /* ---------------- Pre-claim offer card ---------------- */
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center px-4"
-      style={{ backgroundColor: "rgba(10,10,15,0.75)", backdropFilter: "blur(6px)" }}
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="qualifier-title"
-      onClick={onClose}
-    >
+    <section className="py-16">
       <div
-        className="relative w-full max-w-md rounded-3xl border p-6 sm:p-8"
+        className="rounded-3xl border p-8 sm:p-10"
         style={{
           borderColor: "rgba(197,248,42,0.25)",
           backgroundColor: "var(--bg-elevated)",
           boxShadow:
-            "0 30px 80px -20px rgba(0,0,0,0.7), 0 0 60px -20px rgba(197,248,42,0.2)",
+            "0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(197,248,42,0.08), 0 0 60px -20px rgba(197,248,42,0.18)",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <button
-          type="button"
-          onClick={onClose}
-          aria-label="Close"
-          className="absolute right-4 top-4 text-white/60 transition-colors hover:text-white"
-        >
-          <CloseIcon />
-        </button>
+        {/* Countdown */}
+        <div className="text-center">
+          <SectionLabel>
+            // {launched ? "LAUNCHING NOW" : "LAUNCHING IN"}
+          </SectionLabel>
+          <div className="mt-5">
+            {launched ? (
+              <p
+                className="font-display text-[clamp(2rem,6vw,3rem)] font-bold tracking-tight"
+                style={{ color: "var(--spec-lime)" }}
+              >
+                Launching now
+              </p>
+            ) : (
+              <CountdownDisplay timeLeft={timeLeft} />
+            )}
+          </div>
+        </div>
 
-        <SectionLabel>// ONE QUICK QUESTION</SectionLabel>
-        <h3
-          id="qualifier-title"
-          className="mt-3 text-balance text-[clamp(1.2rem,3.5vw,1.4rem)] font-bold leading-tight text-white"
-        >
-          How much does @{handle || "yourbrand"} currently spend on UGC
-          creatives per month?
-        </h3>
+        {/* Divider */}
+        <div
+          className="my-8 h-px w-full"
+          style={{ backgroundColor: "var(--border-subtle)" }}
+        />
+
+        {/* Offer */}
+        <div className="text-center">
+          <p
+            className="font-mono text-[12px] uppercase tracking-[0.22em]"
+            style={{ color: "var(--spec-lime)" }}
+          >
+            Founding Member · $1
+          </p>
+          <h3 className="mt-3 text-balance text-[clamp(1.4rem,4vw,1.8rem)] font-bold leading-tight text-white">
+            Get 1 month of full Ultimate access at launch — for one dollar.
+          </h3>
+        </div>
+
+        {/* Benefits */}
+        <ul className="mx-auto mt-8 max-w-md space-y-3">
+          {benefits.map((b) => (
+            <li key={b} className="flex items-start gap-3 text-[15px]">
+              <span
+                aria-hidden
+                className="mt-1 inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full"
+                style={{
+                  backgroundColor: "rgba(197,248,42,0.15)",
+                  color: "var(--spec-lime)",
+                }}
+              >
+                <CheckIcon />
+              </span>
+              <span className="text-white/90">{b}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Anchor price */}
         <p
-          className="mt-2 text-[13px] leading-relaxed"
+          className="mx-auto mt-8 max-w-md text-center text-[15px]"
           style={{ color: "var(--text-muted)" }}
         >
-          Helps us tailor your founding-member onboarding.
+          Normally{" "}
+          <span className="text-white line-through">
+            ${ULTIMATE_TIER_PRICE_DISPLAY}/mo
+          </span>{" "}
+          — yours for{" "}
+          <span
+            className="font-display italic font-semibold"
+            style={{ color: "var(--spec-lime)" }}
+          >
+            $1
+          </span>
+          .
         </p>
 
-        <div className="mt-5 grid gap-2">
-          {options.map((opt) => (
-            <button
-              key={opt}
-              type="button"
-              onClick={() => onSubmit(opt)}
-              className="w-full rounded-xl border px-5 py-4 text-left text-[15px] font-medium text-white transition-colors"
-              style={{
-                borderColor: "var(--border-subtle)",
-                backgroundColor: "rgba(255,255,255,0.02)",
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = "rgba(197,248,42,0.4)";
-                e.currentTarget.style.backgroundColor =
-                  "rgba(197,248,42,0.06)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = "var(--border-subtle)";
-                e.currentTarget.style.backgroundColor =
-                  "rgba(255,255,255,0.02)";
-              }}
-            >
-              {opt}
-            </button>
-          ))}
+        {/* CTA */}
+        <div className="mx-auto mt-8 max-w-md">
+          <button
+            type="button"
+            onClick={handleClaim}
+            className="block w-full rounded-full px-6 py-4 text-center text-[15px] font-semibold transition-transform hover:scale-[1.01]"
+            style={{
+              backgroundColor: "var(--spec-lime)",
+              color: "#0A0A0F",
+              boxShadow: "0 0 40px -10px rgba(197,248,42,0.5)",
+            }}
+          >
+            {launched ? "Activate my access" : "Claim my $1 founding spot"}
+          </button>
         </div>
+
+        {/* Reassurances */}
+        <ul className="mx-auto mt-5 max-w-md space-y-2">
+          {[
+            "One-time $1 charge. No auto-renewal.",
+            "Cancel anytime during your month.",
+            "Keep your spot even if you don't continue.",
+          ].map((r) => (
+            <li
+              key={r}
+              className="flex items-start gap-2 text-[13px] leading-relaxed"
+              style={{ color: "var(--text-muted)" }}
+            >
+              <span
+                aria-hidden
+                className="mt-[2px] shrink-0"
+                style={{ color: "var(--spec-lime)" }}
+              >
+                <CheckIcon />
+              </span>
+              <span>{r}</span>
+            </li>
+          ))}
+        </ul>
+
+        {/* Spots remaining */}
+        <p
+          className="mt-8 text-center font-mono text-[12px] uppercase tracking-[0.22em]"
+          style={{ color: "var(--text-muted)" }}
+        >
+          <span className="text-white">{remaining}</span> of{" "}
+          {FOUNDING_MEMBER_CAP} spots remaining
+        </p>
       </div>
+    </section>
+  );
+}
+
+/* ---------- Countdown display ---------- */
+
+function CountdownDisplay({ timeLeft }: { timeLeft: TimeLeft | null }) {
+  // Render zeros on first paint so SSR/CSR markup matches.
+  const safe = timeLeft ?? { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
+
+  return (
+    <div className="flex items-end justify-center gap-2 sm:gap-3">
+      <TimeUnit value={safe.days} label="DAYS" />
+      <Colon />
+      <TimeUnit value={safe.hours} label="HRS" />
+      <Colon />
+      <TimeUnit value={safe.minutes} label="MIN" />
+      <Colon />
+      <TimeUnit value={safe.seconds} label="SEC" />
     </div>
+  );
+}
+
+function TimeUnit({ value, label }: { value: number; label: string }) {
+  return (
+    <div className="flex flex-col items-center">
+      <span
+        className="font-display text-[clamp(2rem,7vw,3.5rem)] font-bold tabular-nums leading-none"
+        style={{
+          color: "var(--spec-lime)",
+          textShadow: "0 0 40px rgba(197,248,42,0.35)",
+        }}
+      >
+        {String(value).padStart(2, "0")}
+      </span>
+      <span
+        className="mt-2 font-mono text-[10px] uppercase tracking-[0.22em]"
+        style={{ color: "var(--text-dim)" }}
+      >
+        {label}
+      </span>
+    </div>
+  );
+}
+
+function Colon() {
+  return (
+    <span
+      aria-hidden
+      className="font-display text-[clamp(2rem,7vw,3.5rem)] font-bold leading-none"
+      style={{ color: "var(--text-dim)", paddingBottom: "clamp(20px,3vw,32px)" }}
+    >
+      :
+    </span>
   );
 }
 
@@ -819,7 +954,9 @@ function EmailConfirmationNote({ email }: { email: string }) {
       style={{ color: "var(--text-dim)" }}
     >
       Your full report PDF has also been sent to{" "}
-      <span className="text-white">{email || "your email"}</span>.
+      <span className="text-white">{email || "your email"}</span>. We&apos;ll
+      send your launch-day access link to the same address if you grab a
+      founding spot.
     </p>
   );
 }
@@ -876,23 +1013,6 @@ function CheckIcon() {
       strokeLinejoin="round"
     >
       <path d="M5 12l5 5L20 7" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M6 6l12 12" />
-      <path d="M18 6L6 18" />
     </svg>
   );
 }
