@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import AuditCommentsMarquee from "./_components/AuditCommentsMarquee";
 import AuditReplay from "./_components/AuditReplay";
 
 /* ================================================================== */
@@ -108,11 +107,6 @@ function HeroSection() {
 
   return (
     <section className="relative overflow-hidden px-4 pb-20 pt-8 md:px-8">
-      {/* Background marquee — comments → branded creatives, scrolling
-          right-to-left at low opacity. Pointer-events disabled so it
-          never intercepts clicks on the hero copy/CTA. */}
-      <AuditCommentsMarquee />
-
       <div className="relative z-10 mx-auto max-w-5xl">
         {/* Pre-headline */}
         <p
@@ -138,8 +132,12 @@ function HeroSection() {
           style={{ color: "var(--text-muted)" }}
         >
           Most skincare brands are sitting on 5 figures of customer content in
-          their DMs and comments. We scan it, rank it, and show you exactly what
-          it&apos;s worth — no login, no card, no work on your end.
+          their DMs and comments. We scan it, rank it, and turn the best ones
+          into{" "}
+          <span className="text-white">
+            AI-generated image creatives
+          </span>{" "}
+          you can post the same day — no login, no card, no work on your end.
         </p>
 
         <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:items-start">
@@ -150,6 +148,7 @@ function HeroSection() {
               {[
                 "Your exact unused review count",
                 "Top 10 reviews ranked by content quality",
+                "AI-generated image creatives from your best reviews",
                 "Estimated dollar value of unused content",
                 "Full report delivered in 60 seconds",
                 "Zero login, zero card, zero hassle",

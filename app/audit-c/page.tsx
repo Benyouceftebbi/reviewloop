@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import AuditCommentsMarquee from "../audit/_components/AuditCommentsMarquee";
 import AuditReplay from "../audit/_components/AuditReplay";
 
 /* ================================================================== */
@@ -61,11 +60,6 @@ function HeroSection() {
 
   return (
     <section className="relative overflow-hidden px-4 pb-24 pt-4 md:px-8">
-      {/* Background marquee — comments → branded creatives, scrolling
-          right-to-left at low opacity. Pointer-events disabled so it
-          never intercepts clicks on the hero copy/CTA. */}
-      <AuditCommentsMarquee />
-
       <div className="relative z-10 mx-auto max-w-5xl">
         {/* Variant tag */}
         <p
