@@ -162,3 +162,35 @@ html.lenis body {
   78%  { --spot-x: 65%; }
   100% { --spot-x: 50%; }
 }
+
+/*
+  Audit hero background marquee — a single horizontal track of comment→creative
+  pair cards translates from 0 to -50% of its width. The track contains the
+  cards twice in sequence, so when the first half scrolls fully off, the
+  duplicate sits flush at x=0 and the loop is seamless.
+*/
+@keyframes auditMarquee {
+  from { transform: translate3d(0, 0, 0); }
+  to   { transform: translate3d(-50%, 0, 0); }
+}
+@keyframes auditMarqueeReverse {
+  from { transform: translate3d(-50%, 0, 0); }
+  to   { transform: translate3d(0, 0, 0); }
+}
+.audit-marquee-track {
+  animation: auditMarquee 60s linear infinite;
+  will-change: transform;
+}
+.audit-marquee-track-slow {
+  animation: auditMarquee 90s linear infinite;
+  will-change: transform;
+}
+.audit-marquee-track-reverse {
+  animation: auditMarqueeReverse 75s linear infinite;
+  will-change: transform;
+}
+@media (prefers-reduced-motion: reduce) {
+  .audit-marquee-track,
+  .audit-marquee-track-slow,
+  .audit-marquee-track-reverse { animation: none; }
+}
