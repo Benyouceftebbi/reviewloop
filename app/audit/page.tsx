@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 /* ================================================================== */
 /*  /audit — Hormozi-style squeeze page                                */
@@ -86,6 +87,7 @@ export default function AuditPage() {
 /* ------------------------------------------------------------------ */
 
 function HeroSection() {
+  const router = useRouter();
   const [handle, setHandle] = useState("");
   const [email, setEmail] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -94,10 +96,12 @@ function HeroSection() {
     e.preventDefault();
     if (!handle.trim() || !email.trim()) return;
     setSubmitting(true);
-    // Placeholder — wire to real API later
-    await new Promise((r) => setTimeout(r, 1200));
-    setSubmitting(false);
-    alert("Check your inbox — your report is on the way.");
+    // Store handle for the scanning page, then navigate
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("audit_handle", handle.trim());
+      sessionStorage.setItem("audit_email", email.trim());
+    }
+    router.push("/audit/scanning");
   };
 
   return (
