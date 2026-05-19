@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 /* ================================================================== */
 /*  /audit/scanning — scan progress page                               */
@@ -231,54 +232,56 @@ export default function ScanningPage() {
 
               {/* Status messages */}
               <div
-                className="h-48 overflow-y-auto rounded-2xl border p-4"
+                className="rounded-2xl border"
                 style={{
                   borderColor: "var(--border-subtle)",
                   backgroundColor: "var(--bg-elevated)",
                 }}
               >
                 <p
-                  className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em]"
+                  className="px-4 pt-4 pb-2 font-mono text-[10px] uppercase tracking-[0.18em]"
                   style={{ color: "var(--text-dim)" }}
                 >
                   // extraction log
                 </p>
-                <div className="space-y-2">
-                  {visibleMessages.map((msg, i) => (
-                    <div
-                      key={i}
-                      className="flex items-start gap-2 text-[13px]"
-                      style={{
-                        animation: "fadeSlideIn 0.3s ease-out",
-                      }}
-                    >
-                      <span
-                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                <ScrollArea className="h-48 px-4 pb-4">
+                  <div className="space-y-2 pr-3">
+                    {visibleMessages.map((msg, i) => (
+                      <div
+                        key={i}
+                        className="flex items-start gap-2 text-[13px]"
                         style={{
-                          backgroundColor:
-                            i === visibleMessages.length - 1
-                              ? "var(--spec-lime)"
-                              : "var(--text-dim)",
-                          boxShadow:
-                            i === visibleMessages.length - 1
-                              ? "0 0 8px var(--lime-glow)"
-                              : "none",
-                        }}
-                      />
-                      <span
-                        style={{
-                          color:
-                            i === visibleMessages.length - 1
-                              ? "var(--spec-lime)"
-                              : "var(--text-muted)",
+                          animation: "fadeSlideIn 0.3s ease-out",
                         }}
                       >
-                        {msg}
-                      </span>
-                    </div>
-                  ))}
-                  <div ref={messagesEndRef} />
-                </div>
+                        <span
+                          className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                          style={{
+                            backgroundColor:
+                              i === visibleMessages.length - 1
+                                ? "var(--spec-lime)"
+                                : "var(--text-dim)",
+                            boxShadow:
+                              i === visibleMessages.length - 1
+                                ? "0 0 8px var(--lime-glow)"
+                                : "none",
+                          }}
+                        />
+                        <span
+                          style={{
+                            color:
+                              i === visibleMessages.length - 1
+                                ? "var(--spec-lime)"
+                                : "var(--text-muted)",
+                          }}
+                        >
+                          {msg}
+                        </span>
+                      </div>
+                    ))}
+                    <div ref={messagesEndRef} />
+                  </div>
+                </ScrollArea>
               </div>
 
               <p
