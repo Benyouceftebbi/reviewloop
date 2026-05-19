@@ -15,11 +15,14 @@ import Link from "next/link";
 export default function AuditPage() {
   return (
     <main
-      className="min-h-screen font-sans text-white"
+      className="relative min-h-screen font-sans text-white isolate overflow-hidden"
       style={{ backgroundColor: "var(--bg-base)" }}
     >
+      {/* Shared background — purple/blue glow blobs like the main site */}
+      <AuditBackground />
+
       {/* Logo only — no nav */}
-      <header className="flex items-center justify-center py-8">
+      <header className="relative z-10 flex items-center justify-center py-8">
         <Link href="/" aria-label="reviewloop home">
           <LogoMark />
         </Link>
@@ -51,7 +54,7 @@ export default function AuditPage() {
 
       {/* Minimal footer */}
       <footer
-        className="border-t py-8 text-center text-[13px]"
+        className="relative z-10 border-t py-8 text-center text-[13px]"
         style={{
           borderColor: "var(--border-subtle)",
           color: "var(--text-dim)",
@@ -101,7 +104,7 @@ function HeroSection() {
   };
 
   return (
-    <section className="px-4 pb-20 pt-8 md:px-8">
+    <section className="relative z-10 px-4 pb-20 pt-8 md:px-8">
       <div className="mx-auto max-w-5xl">
         {/* Pre-headline */}
         <p
@@ -297,7 +300,7 @@ function MockReportCard() {
 function WhoSection() {
   return (
     <section
-      className="border-t px-4 py-20 md:px-8"
+      className="relative z-10 border-t px-4 py-20 md:px-8"
       style={{ borderColor: "var(--border-subtle)" }}
     >
       <div className="mx-auto max-w-3xl text-center">
@@ -329,7 +332,7 @@ function WhoSection() {
 function ProblemSection() {
   return (
     <section
-      className="border-t px-4 py-20 md:px-8"
+      className="relative z-10 border-t px-4 py-20 md:px-8"
       style={{
         borderColor: "var(--border-subtle)",
         backgroundColor: "var(--bg-deep)",
@@ -403,7 +406,7 @@ function HowItWorksSection() {
 
   return (
     <section
-      className="border-t px-4 py-20 md:px-8"
+      className="relative z-10 border-t px-4 py-20 md:px-8"
       style={{ borderColor: "var(--border-subtle)" }}
     >
       <div className="mx-auto max-w-4xl text-center">
@@ -445,7 +448,7 @@ function HowItWorksSection() {
 function SampleReportSection() {
   return (
     <section
-      className="border-t px-4 py-20 md:px-8"
+      className="relative z-10 border-t px-4 py-20 md:px-8"
       style={{
         borderColor: "var(--border-subtle)",
         backgroundColor: "var(--bg-deep)",
@@ -590,7 +593,7 @@ function SampleReportSection() {
 function SocialProofSection() {
   return (
     <section
-      className="border-t px-4 py-20 md:px-8"
+      className="relative z-10 border-t px-4 py-20 md:px-8"
       style={{ borderColor: "var(--border-subtle)" }}
     >
       <div className="mx-auto max-w-3xl text-center">
@@ -650,7 +653,7 @@ const FAQ_ITEMS = [
 function FAQSection() {
   return (
     <section
-      className="border-t px-4 py-20 md:px-8"
+      className="relative z-10 border-t px-4 py-20 md:px-8"
       style={{
         borderColor: "var(--border-subtle)",
         backgroundColor: "var(--bg-deep)",
@@ -749,7 +752,7 @@ function FinalCTASection() {
 
   return (
     <section
-      className="relative overflow-hidden border-t px-4 py-24 md:px-8"
+      className="relative z-10 overflow-hidden border-t px-4 py-24 md:px-8"
       style={{ borderColor: "var(--border-subtle)" }}
     >
       {/* Background glow */}
@@ -937,5 +940,111 @@ function PlusIcon() {
       <path d="M12 5v14" />
       <path d="M5 12h14" />
     </svg>
+  );
+}
+
+/* ================================================================== */
+/*  Background — purple/blue glow blobs like the main marketing site   */
+/* ================================================================== */
+
+function AuditBackground() {
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+    >
+      {/* Top-left purple source */}
+      <div
+        className="absolute h-[700px] w-[700px] rounded-full blur-[180px]"
+        style={{
+          top: "-200px",
+          left: "-160px",
+          backgroundColor: "var(--purple-glow)",
+          opacity: 0.55,
+        }}
+      />
+
+      {/* Diagonal beam */}
+      <div
+        className="absolute -rotate-[28deg] blur-[90px]"
+        style={{
+          top: "-4%",
+          left: "8%",
+          height: "60vh",
+          width: "420px",
+          background:
+            "linear-gradient(180deg, rgba(99,102,241,0.85) 0%, rgba(67,56,202,0.55) 45%, rgba(30,27,75,0) 100%)",
+        }}
+      />
+
+      {/* Mid-page concentrated indigo */}
+      <div
+        className="absolute h-[520px] w-[380px] rounded-full blur-[110px]"
+        style={{
+          top: "5%",
+          left: "18%",
+          backgroundColor: "rgba(99,102,241,0.55)",
+        }}
+      />
+
+      {/* Top-right cool blue */}
+      <div
+        className="absolute h-[600px] w-[800px] rounded-full blur-[160px]"
+        style={{
+          top: "5%",
+          right: "-100px",
+          backgroundColor: "rgba(29,78,216,0.45)",
+        }}
+      />
+
+      {/* Upper-mid soft purple from right */}
+      <div
+        className="absolute h-[900px] w-[900px] rounded-full blur-[220px]"
+        style={{
+          top: "16%",
+          right: "-22%",
+          backgroundColor: "rgba(99,102,241,0.32)",
+        }}
+      />
+
+      {/* Mid indigo from left */}
+      <div
+        className="absolute h-[1000px] w-[1000px] rounded-full blur-[240px]"
+        style={{
+          top: "36%",
+          left: "-28%",
+          backgroundColor: "rgba(67,56,202,0.3)",
+        }}
+      />
+
+      {/* Lower-mid purple from right */}
+      <div
+        className="absolute h-[900px] w-[900px] rounded-full blur-[220px]"
+        style={{
+          top: "55%",
+          right: "-18%",
+          backgroundColor: "rgba(79,70,229,0.32)",
+        }}
+      />
+
+      {/* Late warmth — purple from left near bottom */}
+      <div
+        className="absolute h-[900px] w-[900px] rounded-full blur-[220px]"
+        style={{
+          top: "78%",
+          left: "-15%",
+          backgroundColor: "rgba(99,102,241,0.38)",
+        }}
+      />
+
+      {/* Bottom fade to black */}
+      <div
+        className="absolute inset-x-0 bottom-0 h-[400px]"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(10,10,15,0.55) 100%)",
+        }}
+      />
+    </div>
   );
 }
