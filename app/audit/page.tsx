@@ -30,6 +30,9 @@ export default function AuditPage() {
       {/* Hero — above the fold */}
       <HeroSection />
 
+      {/* Trust strip — pattern interrupt + risk reversal reinforcement */}
+      <TrustStrip />
+
       {/* Who this is for */}
       <WhoSection />
 
@@ -116,39 +119,40 @@ function HeroSection() {
           Attention skincare DTC founders doing $500K–$5M a year:
         </p>
 
-        {/* Headline */}
+        {/* Headline — specificity over safety, no "+" hedge */}
         <h1 className="text-balance text-[clamp(2rem,5vw,3.2rem)] font-bold leading-[1.1] tracking-tight text-white">
-          How to find{" "}
+          How to find the{" "}
           <span className="font-display italic" style={{ color: "var(--spec-lime)" }}>
-            247+
+            247
           </span>{" "}
-          untapped customer reviews hiding in your Instagram — free, in 60
-          seconds.
+          customer reviews hiding in your Instagram — free, in 60 seconds.
         </h1>
 
-        {/* Subheadline */}
+        {/* Subheadline — single job: what you get, in one sentence */}
         <p
           className="mt-6 max-w-2xl text-[1.125rem] leading-relaxed"
           style={{ color: "var(--text-muted)" }}
         >
-          Most skincare brands are sitting on 5 figures of customer content in
-          their DMs and comments. We scan it, rank it, and turn the best ones
-          into{" "}
+          Free Instagram scan. We find every review you&apos;ve earned in the
+          last 90 days, rank them by quality, and{" "}
           <span className="text-white">
-            AI-generated image creatives
+            generate 3 sample creatives from your top reviews
           </span>{" "}
-          you can post the same day — no login, no card, no work on your end.
+          — in 60 seconds.
         </p>
 
         <div className="mt-12 grid gap-12 lg:grid-cols-2 lg:items-start">
           {/* Left — bullets + form */}
           <div>
-            {/* Bullet stack */}
+            {/*
+              Bullet stack — 4 outcome bullets first, then 2 friction-killers.
+              Hormozi-style: lead with what they get, then de-risk.
+            */}
             <ul className="space-y-3 text-[15px]">
               {[
                 "Your exact unused review count",
                 "Top 10 reviews ranked by content quality",
-                "AI-generated image creatives from your best reviews",
+                "3 sample creatives generated from your top reviews",
                 "Estimated dollar value of unused content",
                 "Full report delivered in 60 seconds",
                 "Zero login, zero card, zero hassle",
@@ -350,6 +354,30 @@ function ProblemSection() {
         <h2 className="mt-4 text-[clamp(1.5rem,4vw,2rem)] font-bold text-white">
           Why most brands waste their reviews
         </h2>
+
+        {/*
+          Hero agitation — one emotionally heavy frame before the polite
+          3-card breakdown. Drives the dollar cost home so the cards
+          below read as mechanism, not just diagnosis.
+        */}
+        <p
+          className="mx-auto mt-6 max-w-2xl text-[1.05rem] leading-relaxed"
+          style={{ color: "var(--text-muted)" }}
+        >
+          While you scroll past{" "}
+          <span className="text-white font-semibold">247 reviews</span> you
+          already earned, your competitors are paying UGC creators{" "}
+          <span className="text-white font-semibold">$30 a piece</span> for the
+          exact same content. You&apos;re sitting on{" "}
+          <span
+            className="font-display italic"
+            style={{ color: "var(--spec-lime)" }}
+          >
+            $7,400
+          </span>{" "}
+          in free assets.
+        </p>
+
         <ul className="mx-auto mt-10 grid gap-6 text-left sm:grid-cols-3">
           {[
             {
@@ -406,8 +434,8 @@ function HowItWorksSection() {
     },
     {
       num: "03",
-      title: "Get your report",
-      desc: "Review count, top 10 ranked, estimated value — in 60 seconds.",
+      title: "Get your report + 3 free creatives",
+      desc: "Review count, top 10 ranked, estimated value, and 3 sample creatives — in 60 seconds.",
     },
   ];
 
@@ -594,6 +622,18 @@ function SampleReportSection() {
             </ul>
           </div>
         </div>
+
+        {/*
+          Methodology footnote — transparent calc builds trust.
+          Spec calls this out explicitly: never show a $ value
+          without showing the math behind it.
+        */}
+        <p
+          className="mx-auto mt-6 max-w-2xl text-center text-[12px]"
+          style={{ color: "var(--text-dim)" }}
+        >
+          Estimated value based on $30 average UGC creator cost per asset.
+        </p>
       </div>
     </section>
   );
@@ -609,28 +649,113 @@ function SocialProofSection() {
       className="border-t px-4 py-20 md:px-8"
       style={{ borderColor: "var(--border-subtle)" }}
     >
-      <div className="mx-auto max-w-3xl text-center">
-        <SectionBadge>Social proof</SectionBadge>
-        <h2 className="mt-4 text-[clamp(1.5rem,4vw,2rem)] font-bold text-white">
-          Brands using reviewloop
-        </h2>
-
-        {/* Placeholder — add real testimonials when available */}
-        <div
-          className="mx-auto mt-10 max-w-md rounded-2xl border p-8"
-          style={{
-            borderColor: "var(--border-subtle)",
-            backgroundColor: "var(--bg-elevated)",
-          }}
-        >
-          <p
-            className="text-[14px] leading-relaxed"
-            style={{ color: "var(--text-muted)" }}
-          >
-            We&apos;ll add real testimonials here as soon as our first customers
-            share their results. No fake quotes — ever.
-          </p>
+      <div className="mx-auto max-w-4xl">
+        <div className="text-center">
+          <SectionBadge>Proof</SectionBadge>
+          <h2 className="mt-4 text-[clamp(1.5rem,4vw,2rem)] font-bold text-white">
+            Why you can trust this scan
+          </h2>
         </div>
+
+        {/*
+          Three credibility legs replacing the empty-testimonials block:
+          (1) Founder line, (2) technical stack, (3) live demo proof.
+          Honest about pre-launch state — no fabricated logos or quotes.
+        */}
+        <div className="mt-10 grid gap-5 md:grid-cols-3">
+          {/* Founder credibility */}
+          <div
+            className="rounded-2xl border p-6"
+            style={{
+              borderColor: "var(--border-subtle)",
+              backgroundColor: "var(--bg-elevated)",
+            }}
+          >
+            <p
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--spec-lime)" }}
+            >
+              Built by
+            </p>
+            <p className="mt-3 text-[15px] font-semibold text-white">
+              Ben Youcef
+            </p>
+            <p
+              className="mt-1 text-[13px] leading-relaxed"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Ex-DTC operator. Spent 4 years watching skincare brands burn
+              budget on UGC they already had sitting in their DMs.
+            </p>
+          </div>
+
+          {/* Technical credibility */}
+          <div
+            className="rounded-2xl border p-6"
+            style={{
+              borderColor: "var(--border-subtle)",
+              backgroundColor: "var(--bg-elevated)",
+            }}
+          >
+            <p
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--spec-lime)" }}
+            >
+              Powered by
+            </p>
+            <p className="mt-3 text-[15px] font-semibold text-white">
+              Meta Graph API
+            </p>
+            <p
+              className="mt-1 text-[13px] leading-relaxed"
+              style={{ color: "var(--text-muted)" }}
+            >
+              Public-data only, Shopify integration ready. We never touch
+              private DMs or post on your behalf.
+            </p>
+          </div>
+
+          {/* Live demo proof */}
+          <div
+            className="rounded-2xl border p-6"
+            style={{
+              borderColor: "var(--border-subtle)",
+              backgroundColor: "var(--bg-elevated)",
+            }}
+          >
+            <p
+              className="font-mono text-[10px] uppercase tracking-[0.18em]"
+              style={{ color: "var(--spec-lime)" }}
+            >
+              See it run
+            </p>
+            <a
+              href="https://www.loom.com/"
+              target="_blank"
+              rel="noreferrer"
+              className="mt-3 inline-flex items-center gap-2 text-[15px] font-semibold text-white underline-offset-4 hover:underline"
+            >
+              Watch 30-sec demo
+              <span aria-hidden>↗</span>
+            </a>
+            <p
+              className="mt-1 text-[13px] leading-relaxed"
+              style={{ color: "var(--text-muted)" }}
+            >
+              A live scan in motion — see exactly what the report looks like
+              before you drop your handle.
+            </p>
+          </div>
+        </div>
+
+        {/* Honest note about testimonials */}
+        <p
+          className="mx-auto mt-8 max-w-md text-center text-[13px] leading-relaxed"
+          style={{ color: "var(--text-dim)" }}
+        >
+          We&apos;ll add real customer testimonials here as soon as our first
+          users share their results. No fake quotes — ever.
+        </p>
       </div>
     </section>
   );
@@ -651,11 +776,11 @@ const FAQ_ITEMS = [
   },
   {
     q: "Why is this free?",
-    a: "The audit is free because we want to show you what's possible. If you like the results, you can upgrade to auto-generate creatives from your reviews.",
+    a: "We include 3 sample creatives so you can see what's possible. If you want creatives from all your top reviews — not just 3 — that's the paid upgrade. The audit and the 3 samples are 100% free, with no card and no obligation.",
   },
   {
     q: "What happens after I get my report?",
-    a: "You'll receive an email with your full report. No obligations, no auto-billing. If you want to turn those reviews into ads, we'll show you how.",
+    a: "You'll receive an email with your full report and your 3 free sample creatives. No obligations, no auto-billing. If you want to turn the rest of your reviews into ads, we'll show you how.",
   },
   {
     q: "How long does this take?",
@@ -874,6 +999,45 @@ function FinalCTASection() {
 /* Shared UI                                                           */
 /* ------------------------------------------------------------------ */
 
+/*
+  Trust strip — three credibility badges between the hero and the
+  qualifier section. Acts as a pattern interrupt right after the form
+  and reinforces the risk reversal a second time. Spec called this out
+  explicitly: skipping it leaves the page jumping straight from form
+  into "Who this is for" with no pause.
+*/
+function TrustStrip() {
+  const badges = [
+    { label: "60-second scan", icon: ClockIcon },
+    { label: "No signup, no card", icon: ShieldIcon },
+    { label: "Built for skincare DTC brands", icon: SparkleIcon },
+  ];
+  return (
+    <div
+      className="border-t border-b px-4 py-6 md:px-8"
+      style={{
+        borderColor: "var(--border-subtle)",
+        backgroundColor: "var(--bg-deep)",
+      }}
+    >
+      <ul className="mx-auto flex max-w-4xl flex-wrap items-center justify-center gap-x-10 gap-y-3">
+        {badges.map(({ label, icon: Icon }) => (
+          <li
+            key={label}
+            className="flex items-center gap-2 text-[13px] font-medium"
+            style={{ color: "var(--text-muted)" }}
+          >
+            <span style={{ color: "var(--spec-lime)" }}>
+              <Icon />
+            </span>
+            <span className="text-white/90">{label}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function SectionBadge({ children }: { children: React.ReactNode }) {
   return (
     <span
@@ -952,6 +1116,57 @@ function PlusIcon() {
     >
       <path d="M12 5v14" />
       <path d="M5 12h14" />
+    </svg>
+  );
+}
+
+function ClockIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx="12" cy="12" r="9" />
+      <path d="M12 7v5l3 2" />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6l8-3z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  );
+}
+
+function SparkleIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className="h-4 w-4"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6L12 3z" />
+      <path d="M19 14l.8 2.2L22 17l-2.2.8L19 20l-.8-2.2L16 17l2.2-.8L19 14z" />
     </svg>
   );
 }
