@@ -22,7 +22,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useReveal } from "../landing1/useReveal";
-import { TemplatePicker } from "../landing-templates/templates";
+import { TemplatePicker, TemplatePreview } from "../landing-templates/templates";
 
 /* Accent + surface tokens local to this page so it never collides with
    the global lime brand tokens. */
@@ -233,26 +233,13 @@ function HeroPreview() {
           boxShadow: "0 40px 120px -40px rgba(77,159,255,0.35)",
         }}
       >
-        {/* Reviews side */}
+        {/* Reviews side — showcased with the live Maps Snippet template */}
         <div className="rounded-2xl border p-5 text-left" style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(0,0,0,0.25)" }}>
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/40">
             Review wall
           </p>
-          <div className="mt-4 space-y-3">
-            {[
-              "Best decision we made all year.",
-              "They handled everything — flawless.",
-              "Our bookings doubled in a month.",
-            ].map((q, i) => (
-              <div key={i} className="rounded-xl border px-4 py-3" style={{ borderColor: "rgba(255,255,255,0.08)", backgroundColor: "rgba(255,255,255,0.02)" }}>
-                <div className="flex gap-0.5" style={{ color: ACCENT }}>
-                  {Array.from({ length: 5 }).map((_, s) => (
-                    <Star key={s} />
-                  ))}
-                </div>
-                <p className="mt-1.5 text-[13.5px] text-white/80">{q}</p>
-              </div>
-            ))}
+          <div className="mt-4">
+            <TemplatePreview accent={ACCENT} />
           </div>
         </div>
 

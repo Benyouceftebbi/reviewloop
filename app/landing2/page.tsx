@@ -25,7 +25,7 @@
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { useReveal } from "../landing1/useReveal";
-import { TemplatePicker } from "../landing-templates/templates";
+import { TemplatePicker, TemplatePreview } from "../landing-templates/templates";
 
 /* Accent token for this variant. Change here to retune the whole page. */
 const ACCENT = "#FF6A3D";
@@ -276,25 +276,22 @@ function Hero() {
 function HeroSplitPreview() {
   return (
     <div className="grid gap-4">
-      {/* Reviews -> post */}
+      {/* Reviews -> post — showcased with the live Maps Snippet template */}
       <div className="rounded-xl border border-white/12 bg-white/[0.03] p-5">
         <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-white/40">
           Reviews → posts
         </p>
-        <div className="mt-4 rounded-lg bg-[#0B0A09] p-4 ring-1 ring-white/10">
-          <Stars />
-          <p className="mt-2 text-[14px] leading-snug text-white/85">
-            “Best facial I&apos;ve had in the city — booking again already.”
-          </p>
-          <div className="mt-4 flex items-center justify-between">
-            <span className="text-[11px] text-white/40">via Google</span>
-            <span
-              className="rounded-md px-2.5 py-1 text-[10px] font-semibold text-[#0B0A09]"
-              style={{ backgroundColor: ACCENT }}
-            >
-              Post ready
-            </span>
-          </div>
+        <div className="mt-4">
+          <TemplatePreview accent={ACCENT} />
+        </div>
+        <div className="mt-4 flex items-center justify-between">
+          <span className="text-[11px] text-white/40">via Google</span>
+          <span
+            className="rounded-md px-2.5 py-1 text-[10px] font-semibold text-[#0B0A09]"
+            style={{ backgroundColor: ACCENT }}
+          >
+            Post ready
+          </span>
         </div>
       </div>
 
@@ -868,18 +865,6 @@ function PlayIcon() {
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor" aria-hidden>
       <path d="M8 5v14l11-7z" />
     </svg>
-  );
-}
-
-function Stars() {
-  return (
-    <div className="flex gap-0.5" style={{ color: ACCENT }} aria-label="5 out of 5 stars">
-      {[0, 1, 2, 3, 4].map((n) => (
-        <svg key={n} viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor" aria-hidden>
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
-      ))}
-    </div>
   );
 }
 

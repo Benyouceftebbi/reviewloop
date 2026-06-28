@@ -14,7 +14,7 @@
   and the picker scales it to fit via a CSS transform.
 */
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -790,6 +790,73 @@ function ScaledTemplate({
         }}
       >
         <Component data={SAMPLE_REVIEW} brand={brand} />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Responsive single-template preview                                 */
+/* ------------------------------------------------------------------ */
+
+/*
+  Renders one template (default: the Maps Snippet) and scales it to
+  fill its parent's width while preserving the template's native aspect
+  ratio. Used in the landing-page heroes to showcase a real review card
+  instead of a hand-rolled mock. A ResizeObserver keeps the scale exact
+  across breakpoints.
+*/
+export function TemplatePreview({
+  templateId = "snippet",
+  accent,
+  brandName = "Glow Skin Spa",
+  data,
+}: {
+  templateId?: string;
+  accent: string;
+  brandName?: string;
+  data?: ReviewData;
+}) {
+  const entry = TEMPLATES.find((t) => t.id === templateId) ?? TEMPLATES[0];
+  const wrapRef = useRef<HTMLDivElement>(null);
+  const [w, setW] = useState(0);
+
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const e of entries) setW(e.contentRect.width);
+    });
+    ro.observe(el);
+    setW(el.clientWidth);
+    return () => ro.disconnect();
+  }, []);
+
+  const scale = w > 0 ? w / entry.w : 0;
+  const brand: BrandData = { brandName, colors: { primary: accent } };
+  const { Component } = entry;
+
+  return (
+    <div
+      ref={wrapRef}
+      style={{
+        width: "100%",
+        height: w > 0 ? entry.h * scale : undefined,
+        aspectRatio: w > 0 ? undefined : `${entry.w} / ${entry.h}`,
+        overflow: "hidden",
+        borderRadius: 12,
+      }}
+    >
+      <div
+        style={{
+          width: entry.w,
+          height: entry.h,
+          transform: `scale(${scale})`,
+          transformOrigin: "top left",
+          visibility: w > 0 ? "visible" : "hidden",
+        }}
+      >
+        <Component data={data ?? SAMPLE_REVIEW} brand={brand} />
       </div>
     </div>
   );
