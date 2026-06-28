@@ -25,6 +25,7 @@
 import { useState } from "react";
 import type { FormEvent, ReactNode } from "react";
 import { useReveal } from "../landing1/useReveal";
+import { TemplatePicker } from "../landing-templates/templates";
 
 /* Accent token for this variant. Change here to retune the whole page. */
 const ACCENT = "#FF6A3D";
@@ -592,20 +593,6 @@ function HowItWorks() {
 /* ================================================================== */
 
 function BrandedPostProof() {
-  const posts = [
-    {
-      quote: "Honestly the most relaxing spa day I&apos;ve ever booked. The staff remembered my name.",
-      client: "Glow Skin Spa",
-    },
-    {
-      quote: "Walked in nervous, walked out smiling. Painless cleaning and the friendliest team.",
-      client: "Northside Dental",
-    },
-    {
-      quote: "The pasta tastes like my nonna&apos;s kitchen. We&apos;re back every single Friday now.",
-      client: "Bella Cucina",
-    },
-  ];
   return (
     <section className="px-4 py-20 md:px-8">
       <div className="mx-auto max-w-6xl">
@@ -615,33 +602,16 @@ function BrandedPostProof() {
             scroll-stopping post
           </span>
         </SectionHeading>
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
-          {posts.map((p, i) => (
-            <Reveal key={p.client} delay={i * 90}>
-              <div
-                className="overflow-hidden rounded-2xl border border-white/10"
-                style={{
-                  background:
-                    "linear-gradient(180deg, rgba(255,106,61,0.10) 0%, rgba(255,255,255,0.02) 45%)",
-                }}
-              >
-                <div className="p-7">
-                  <Stars />
-                  <p
-                    className="mt-4 text-[1.05rem] font-medium leading-relaxed"
-                    dangerouslySetInnerHTML={{ __html: `“${p.quote}”` }}
-                  />
-                </div>
-                <div className="flex items-center justify-between border-t border-white/8 px-7 py-4">
-                  <span className="text-[13px] font-medium text-white/70">
-                    {p.client}
-                  </span>
-                  <GoogleLabel />
-                </div>
-              </div>
-            </Reveal>
-          ))}
-        </div>
+        <p className="mx-auto mt-4 max-w-xl text-center text-[14px] text-white/45">
+          Every review can become a post — choose from 40+ ready-made,
+          on-brand templates. Here are five to start.
+        </p>
+        <Reveal>
+          <div className="mt-12">
+            {/* Coral accent matches landing2's brand color. */}
+            <TemplatePicker accent={ACCENT} />
+          </div>
+        </Reveal>
       </div>
     </section>
   );
@@ -913,16 +883,3 @@ function Stars() {
   );
 }
 
-function GoogleLabel() {
-  return (
-    <span className="inline-flex items-center gap-1.5 text-[11px] text-white/40">
-      <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" aria-hidden>
-        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.27-4.74 3.27-8.1z" />
-        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.99.66-2.26 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z" />
-        <path fill="#FBBC05" d="M5.84 14.1a6.6 6.6 0 0 1 0-4.2V7.06H2.18a11 11 0 0 0 0 9.88l3.66-2.84z" />
-        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1A11 11 0 0 0 2.18 7.06l3.66 2.84C6.71 7.3 9.14 5.38 12 5.38z" />
-      </svg>
-      Google
-    </span>
-  );
-}

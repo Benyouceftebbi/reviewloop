@@ -22,6 +22,7 @@
 
 import { useRef, useState, type FormEvent } from "react";
 import { useReveal } from "../landing1/useReveal";
+import { TemplatePicker } from "../landing-templates/templates";
 
 /* Accent + surface tokens local to this page so it never collides with
    the global lime brand tokens. */
@@ -41,6 +42,7 @@ export default function Landing3() {
       <TrustBar />
       <DualFeature />
       <ReviewFunnel />
+      <PostTemplates />
       <VideoEngine />
       <HowItWorks />
       <VideoProof />
@@ -448,6 +450,29 @@ function ReviewFunnel() {
               </div>
             ))}
           </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Post templates — choose from 40+ layouts                            */
+/* ------------------------------------------------------------------ */
+
+function PostTemplates() {
+  const ref = useReveal<HTMLDivElement>();
+  return (
+    <section className="relative z-10 px-6 py-16">
+      <div ref={ref} data-revealed="false" className="l3-reveal mx-auto max-w-5xl">
+        <SectionHeading
+          kicker="Post templates"
+          title="One review, 40+ ways to post it"
+          sub="Pick a layout and we render it on-brand for every client — square, story, and wide formats included. Here are five to start."
+        />
+        <div className="mt-12">
+          {/* Electric-blue accent matches landing3's brand color. */}
+          <TemplatePicker accent={ACCENT} />
         </div>
       </div>
     </section>
