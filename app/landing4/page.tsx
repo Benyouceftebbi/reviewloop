@@ -11,10 +11,11 @@
   sells an AUTONOMOUS AI AGENT that runs reputation management for an
   agency's roster of local-business clients:
 
-    - Reaches out to customers by SMS, email, and outbound call.
-    - Books and joins meetings to ask about the experience.
-    - Captures answers as text, audio, and video.
-    - Generates posts + video and asks customers to publish to Google Maps.
+    Two collection methods only:
+      1. Texts / emails the customer with a direct Google Maps review link.
+      2. Places an outbound call, asks about the visit, then texts the link.
+    - Captures answers as text + audio.
+    - Generates posts + video from the reviews.
     - Ranks incoming reviews and surfaces what's going well / what's not.
 
   Target: social-media agencies & freelance managers handling spas, salons,
@@ -43,8 +44,6 @@ import { useReveal } from "../landing1/useReveal";
 import {
   TemplatePicker,
   TemplatePreview,
-  SAMPLE_REVIEW,
-  type ReviewData,
 } from "../landing-templates/templates";
 
 /* Accent + surface tokens local to this page. */
@@ -366,45 +365,35 @@ function TrustBar() {
 
 function Channels() {
   const ref = useReveal<HTMLDivElement>();
-  const channels = [
+  const methods = [
     {
-      tag: "SMS",
-      title: "Texts that get replies",
-      body: "The agent opens with a friendly, on-brand text moments after a visit — when the experience is still fresh.",
+      tag: "Method 1 · Text & email",
+      title: "Asks for the review by SMS and email",
+      body: "Moments after a visit, the agent sends a friendly, on-brand text or email with a direct Google Maps link — so leaving a review takes one tap.",
       icon: <IconSms />,
+      steps: ["Sends SMS / email", "Includes Maps link", "Follows up if needed"],
     },
     {
-      tag: "Email",
-      title: "Personalized follow-ups",
-      body: "Branded email sequences that nudge without nagging, tuned to each client's voice and cadence.",
-      icon: <IconMail />,
-    },
-    {
-      tag: "Outbound call",
-      title: "Real voice conversations",
-      body: "For higher-value customers, the agent places a natural outbound call and captures the answer as audio.",
+      tag: "Method 2 · Outbound call",
+      title: "Calls, asks about the visit, then texts the link",
+      body: "For a warmer touch, the agent places a natural outbound call, asks the customer about their experience, then sends an SMS with the Google Maps link to post the review.",
       icon: <IconPhone />,
-    },
-    {
-      tag: "Meetings",
-      title: "Books & joins meetings",
-      body: "Schedules a quick video chat, joins alongside your client, and asks the right questions on camera.",
-      icon: <IconCalendar />,
+      steps: ["Calls the customer", "Captures the answer", "Texts the Maps link"],
     },
   ];
   return (
     <section id="channels" className="relative z-10 px-6 py-16">
       <div ref={ref} data-revealed="false" className="l3-reveal mx-auto max-w-5xl">
         <SectionHeading
-          kicker="Multi-channel outreach"
-          title="It reaches customers wherever they are"
-          sub="One agent, every channel. It picks the right way to reach each customer and follows up until it gets an answer."
+          kicker="How it collects reviews"
+          title="Two ways the agent brings in reviews"
+          sub="Every customer gets the right approach — a quick text, or a real conversation — both ending with a direct link to your client's Google Maps profile."
         />
-        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {channels.map((c) => (
+        <div className="mt-12 grid gap-5 md:grid-cols-2">
+          {methods.map((m) => (
             <div
-              key={c.tag}
-              className="l3-lift rounded-3xl border p-6"
+              key={m.tag}
+              className="l3-lift rounded-3xl border p-7"
               style={{
                 borderColor: "rgba(255,255,255,0.1)",
                 background:
@@ -412,21 +401,38 @@ function Channels() {
               }}
             >
               <span
-                className="flex h-11 w-11 items-center justify-center rounded-xl"
+                className="flex h-12 w-12 items-center justify-center rounded-xl"
                 style={{ backgroundColor: "rgba(77,159,255,0.14)", color: ACCENT }}
               >
-                {c.icon}
+                {m.icon}
               </span>
               <p
                 className="mt-5 text-[11px] font-semibold uppercase tracking-[0.18em]"
                 style={{ color: ACCENT }}
               >
-                {c.tag}
+                {m.tag}
               </p>
-              <h3 className="mt-1.5 text-[1.05rem] font-semibold">{c.title}</h3>
-              <p className="mt-2 text-[14px] leading-relaxed text-white/55">
-                {c.body}
+              <h3 className="mt-1.5 text-[1.2rem] font-semibold">{m.title}</h3>
+              <p className="mt-2 text-[14.5px] leading-relaxed text-white/55">
+                {m.body}
               </p>
+              <div className="mt-5 flex flex-wrap gap-2">
+                {m.steps.map((s, i) => (
+                  <span
+                    key={s}
+                    className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[12px] text-white/65"
+                    style={{ borderColor: "rgba(255,255,255,0.14)" }}
+                  >
+                    <span
+                      className="text-[11px] font-bold"
+                      style={{ color: ACCENT }}
+                    >
+                      {i + 1}
+                    </span>
+                    {s}
+                  </span>
+                ))}
+              </div>
             </div>
           ))}
         </div>
@@ -439,7 +445,9 @@ function Channels() {
 /* Live agent demo — the interactive centerpiece                       */
 /* ------------------------------------------------------------------ */
 
-type Msg = { side: "agent" | "client" | "system"; channel?: string; text: string };
+type VoiceLine = { speaker: "agent" | "client"; text: string };
+type SmsLine = { side: "agent" | "client"; text: string; cta?: boolean };
+type DemoMode = "voice" | "sms";
 
 const BUSINESS_TYPES = [
   "Day spa",
@@ -454,10 +462,11 @@ const BUSINESS_TYPES = [
 
 const WHEN_OPTIONS = ["earlier today", "yesterday", "2 days ago", "last week"];
 
-/* Builds a deterministic conversation + review from the visitor's inputs.
-   No live model call — this is an accurate, data-driven simulation so an
-   agency can see exactly what the agent would produce for a given client. */
-function buildScript(input: {
+/* Builds the two collection conversations from the visitor's inputs. No live
+   model call yet — this is a mock, data-driven preview so an agency can hear
+   exactly how the agent would talk to a given customer on a call or by text.
+   The real voice + SMS agent gets wired in behind this same interface. */
+function buildScenario(input: {
   business: string;
   clientName: string;
   when: string;
@@ -468,45 +477,52 @@ function buildScript(input: {
   const svc = (service || "visit").trim().toLowerCase();
   const biz = business.toLowerCase();
 
-  const messages: Msg[] = [
+  // Method 2: outbound call, then an SMS with the Google Maps link.
+  const voice: VoiceLine[] = [
     {
-      side: "agent",
-      channel: "SMS",
-      text: `Hi ${first}! This is Ava from your ${biz}. How was your ${svc} ${when}?`,
+      speaker: "agent",
+      text: `Hi, is this ${first}? This is Ava calling on behalf of ${biz} — do you have a quick moment?`,
     },
+    { speaker: "client", text: `Sure, what's this about?` },
     {
-      side: "client",
-      text: `Honestly? Really happy. The ${svc} was exactly what I needed and the team was lovely.`,
+      speaker: "agent",
+      text: `I just wanted to check in on your ${svc} ${when}. How was everything?`,
     },
+    { speaker: "client", text: `It was great, honestly. Really happy with it.` },
     {
-      side: "agent",
-      channel: "Call",
-      text: `That's wonderful to hear. Would you come back and recommend us to a friend?`,
+      speaker: "agent",
+      text: `Wonderful to hear. Would it be okay if I text you a link to share that on Google? It only takes a few seconds.`,
     },
+    { speaker: "client", text: `Yeah, that's fine.` },
     {
-      side: "client",
-      text: `Definitely — already telling everyone about it.`,
-    },
-    {
-      side: "agent",
-      channel: "SMS",
-      text: `Amazing. I've written this up as a review — want me to publish it to your Google profile?`,
-    },
-    {
-      side: "system",
-      text: `Captured answer · drafted post · sent Google Maps publish link to ${first}.`,
+      speaker: "agent",
+      text: `Perfect — sending it over now. Thanks so much, ${first}, and have a great day!`,
     },
   ];
 
-  const review: ReviewData = {
-    stars: 5,
-    review: `Came in for a ${svc} ${when} and it was a fantastic experience. The team was warm and professional from start to finish — exactly what you want from a great ${biz}. Already booked my next visit and recommending it to everyone I know!`,
-    name: clientName || "Maya Roberts",
-    date: when === "earlier today" ? "today" : when,
-    logo: SAMPLE_REVIEW.logo,
-  };
+  // Method 1: SMS / email outreach asking for the review with a direct link.
+  const sms: SmsLine[] = [
+    {
+      side: "agent",
+      text: `Hi ${first}! This is ${business}. Thanks for coming in for your ${svc} ${when} — how was everything?`,
+    },
+    { side: "client", text: `Honestly really good, the team was lovely.` },
+    {
+      side: "agent",
+      text: `So glad to hear it! Would you mind leaving a quick review? Here's a direct link:`,
+    },
+    { side: "agent", cta: true, text: `Leave a review on Google` },
+    { side: "client", text: `Just left one — 5 stars.` },
+    {
+      side: "agent",
+      text: `Thank you so much, ${first}. It means a lot to ${business}.`,
+    },
+  ];
 
-  return { messages, review };
+  const endNote =
+    `texted ${first} a Google Maps review link.`;
+
+  return { voice, sms, endNote, first };
 }
 
 function LiveAgentDemo() {
@@ -517,33 +533,38 @@ function LiveAgentDemo() {
   const [when, setWhen] = useState(WHEN_OPTIONS[1]);
   const [service, setService] = useState("deep-tissue massage");
 
-  const [running, setRunning] = useState(false);
+  const [mode, setMode] = useState<DemoMode>("voice");
+  const [playing, setPlaying] = useState(false);
   const [revealed, setRevealed] = useState(0);
 
-  const { messages, review } = useMemo(
-    () => buildScript({ business, clientName, when, service }),
+  const { voice, sms, endNote, first } = useMemo(
+    () => buildScenario({ business, clientName, when, service }),
     [business, clientName, when, service],
   );
 
-  const finished = running && revealed >= messages.length;
+  const lines = mode === "voice" ? voice : sms;
+  const total = lines.length;
+  const finished = playing && revealed >= total;
 
-  // Reveal messages one at a time while running.
+  // Reveal one line at a time while playing.
   useEffect(() => {
-    if (!running) return;
-    if (revealed >= messages.length) return;
-    const delay = revealed === 0 ? 250 : 900;
+    if (!playing || revealed >= total) return;
+    const delay = revealed === 0 ? 350 : mode === "voice" ? 1100 : 850;
     const t = setTimeout(() => setRevealed((n) => n + 1), delay);
     return () => clearTimeout(t);
-  }, [running, revealed, messages.length]);
+  }, [playing, revealed, total, mode]);
 
-  function runAgent() {
+  function start() {
     setRevealed(0);
-    setRunning(true);
+    setPlaying(true);
   }
-
   function reset() {
-    setRunning(false);
+    setPlaying(false);
     setRevealed(0);
+  }
+  function switchMode(m: DemoMode) {
+    setMode(m);
+    reset();
   }
 
   return (
@@ -551,12 +572,12 @@ function LiveAgentDemo() {
       <div ref={ref} data-revealed="false" className="l3-reveal mx-auto max-w-5xl">
         <SectionHeading
           kicker="Live demo"
-          title="Talk to the agent with your own data"
-          sub="Fill in a real client scenario, then watch the agent run the conversation and produce an accurate Google Maps review from it."
+          title="Try the agent before you talk to one"
+          sub="Drop in a real client scenario, then hear how the agent collects the review — on an outbound call, or over SMS. Switch between the two anytime."
         />
 
         <div
-          className="mt-12 grid gap-5 rounded-3xl border p-5 lg:grid-cols-[360px_1fr] sm:p-7"
+          className="mt-12 grid gap-5 rounded-3xl border p-5 lg:grid-cols-[340px_1fr] sm:p-7"
           style={{
             borderColor: "rgba(77,159,255,0.3)",
             background:
@@ -640,117 +661,280 @@ function LiveAgentDemo() {
               </Field>
             </div>
 
-            <button
-              type="button"
-              onClick={runAgent}
-              className="mt-6 w-full rounded-full px-6 py-3.5 text-[15px] font-semibold transition-transform hover:scale-[1.02]"
-              style={{ backgroundColor: ACCENT, color: CANVAS }}
-            >
-              {running ? "Run the agent again" : "Run the agent"}
-            </button>
-            <p className="mt-3 text-center text-[12px] text-white/40">
-              Accurate, data-driven simulation — no setup required.
+            <p className="mt-6 text-[12px] leading-relaxed text-white/40">
+              Pick a channel on the right and start the conversation. Mock
+              preview — the live voice &amp; SMS agent is coming soon.
             </p>
           </div>
 
-          {/* Output: conversation + generated review */}
-          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2">
-            {/* Conversation */}
+          {/* Interaction surface: voice call orb / SMS chat */}
+          <div
+            className="flex min-h-[440px] flex-col rounded-2xl border p-5"
+            style={{
+              borderColor: "rgba(255,255,255,0.1)",
+              backgroundColor: "rgba(0,0,0,0.28)",
+            }}
+          >
+            {/* Mode toggle */}
             <div
-              className="flex min-h-[340px] flex-col rounded-2xl border p-5"
-              style={{
-                borderColor: "rgba(255,255,255,0.1)",
-                backgroundColor: "rgba(0,0,0,0.28)",
-              }}
+              className="flex rounded-full border p-1"
+              style={{ borderColor: "rgba(255,255,255,0.12)" }}
             >
-              <div className="flex items-center gap-2">
-                <AgentDot />
-                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/40">
-                  Agent conversation
-                </p>
-              </div>
-
-              {!running ? (
-                <div className="flex flex-1 flex-col items-center justify-center text-center">
-                  <span
-                    className="flex h-12 w-12 items-center justify-center rounded-full"
-                    style={{ backgroundColor: "rgba(77,159,255,0.14)", color: ACCENT }}
+              {([
+                { id: "voice", label: "Voice call", icon: <IconPhone /> },
+                { id: "sms", label: "SMS chat", icon: <IconSms /> },
+              ] as const).map((t) => {
+                const active = mode === t.id;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => switchMode(t.id)}
+                    className="flex flex-1 items-center justify-center gap-2 rounded-full px-4 py-2 text-[13px] font-semibold transition-colors"
+                    style={{
+                      backgroundColor: active ? ACCENT : "transparent",
+                      color: active ? CANVAS : "rgba(255,255,255,0.6)",
+                    }}
                   >
-                    <IconSpark />
-                  </span>
-                  <p className="mt-4 max-w-[15rem] text-[13.5px] text-white/45">
-                    Press{" "}
-                    <span className="font-semibold text-white/70">
-                      Run the agent
-                    </span>{" "}
-                    to watch it reach out and capture a review.
-                  </p>
-                </div>
-              ) : (
-                <div className="mt-4 space-y-2.5">
-                  {messages.slice(0, revealed).map((m, i) =>
-                    m.side === "system" ? (
-                      <div
-                        key={i}
-                        className="l3-msg flex items-center gap-2 rounded-xl border px-3 py-2.5 text-[12.5px]"
-                        style={{
-                          borderColor: "rgba(77,159,255,0.3)",
-                          backgroundColor: "rgba(77,159,255,0.08)",
-                          color: ACCENT_SOFT,
-                        }}
-                      >
-                        <IconCheck />
-                        <span>{m.text}</span>
-                      </div>
-                    ) : (
-                      <Bubble key={i} side={m.side} channel={m.channel} animate>
-                        {m.text}
-                      </Bubble>
-                    ),
-                  )}
-                  {!finished && (
-                    <div className="flex items-center gap-1.5 px-1 pt-1">
-                      <Typing />
-                    </div>
-                  )}
-                </div>
-              )}
+                    <span className="h-4 w-4">{t.icon}</span>
+                    {t.label}
+                  </button>
+                );
+              })}
             </div>
 
-            {/* Generated review */}
-            <div
-              className="flex flex-col rounded-2xl border p-5"
-              style={{
-                borderColor: finished
-                  ? "rgba(77,159,255,0.4)"
-                  : "rgba(255,255,255,0.1)",
-                backgroundColor: "rgba(0,0,0,0.28)",
-                transition: "border-color 0.4s ease",
-              }}
-            >
-              <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/40">
-                {finished ? "Ready to publish" : "Generated review"}
-              </p>
-              <div className="mt-4 flex flex-1 items-center">
-                <div
-                  className="w-full transition-opacity duration-500"
-                  style={{ opacity: finished ? 1 : 0.25 }}
-                >
-                  <TemplatePreview accent={ACCENT} data={review} brandName={business} />
-                </div>
-              </div>
-              {finished && (
-                <div className="l3-msg mt-4 flex items-center gap-2 text-[12.5px] text-white/55">
-                  <IconCheck />
-                  Publish link sent to {clientName || "the customer"} for Google
-                  Maps.
-                </div>
-              )}
-            </div>
+            {mode === "voice" ? (
+              <VoiceMode
+                lines={voice}
+                revealed={revealed}
+                playing={playing}
+                finished={finished}
+                onStart={start}
+                onReset={reset}
+                first={first}
+                endNote={endNote}
+              />
+            ) : (
+              <SmsMode
+                lines={sms}
+                revealed={revealed}
+                playing={playing}
+                finished={finished}
+                onStart={start}
+                first={first}
+              />
+            )}
           </div>
         </div>
       </div>
     </section>
+  );
+}
+
+/* ---------- Voice mode: aurora orb + live transcript ---------- */
+
+function VoiceMode({
+  lines,
+  revealed,
+  playing,
+  finished,
+  onStart,
+  onReset,
+  first,
+  endNote,
+}: {
+  lines: VoiceLine[];
+  revealed: number;
+  playing: boolean;
+  finished: boolean;
+  onStart: () => void;
+  onReset: () => void;
+  first: string;
+  endNote: string;
+}) {
+  const active = playing && !finished;
+  const label = active ? "End call" : finished ? "Call again" : "Call AI agent";
+
+  return (
+    <div className="mt-5 flex flex-1 flex-col">
+      {/* Orb */}
+      <div className="flex flex-col items-center">
+        <CallOrb
+          active={active}
+          label={label}
+          onClick={active ? onReset : onStart}
+        />
+        <p className="mt-4 text-[12px] text-white/45">
+          {active
+            ? `On call with ${first}…`
+            : finished
+              ? "Call complete"
+              : "Powered by your AI voice agent"}
+        </p>
+      </div>
+
+      {/* Live transcript */}
+      {playing && (
+        <div className="mt-5 space-y-2.5">
+          <p className="text-[10.5px] font-semibold uppercase tracking-[0.2em] text-white/35">
+            Live transcript
+          </p>
+          {lines.slice(0, revealed).map((l, i) => (
+            <Bubble key={i} side={l.speaker} animate>
+              {l.text}
+            </Bubble>
+          ))}
+          {active && (
+            <div className="flex items-center gap-1.5 px-1 pt-1">
+              <Typing />
+            </div>
+          )}
+          {finished && (
+            <div
+              className="l3-msg flex items-center gap-2 rounded-xl border px-3 py-2.5 text-[12.5px]"
+              style={{
+                borderColor: "rgba(77,159,255,0.3)",
+                backgroundColor: "rgba(77,159,255,0.08)",
+                color: ACCENT_SOFT,
+              }}
+            >
+              <IconCheck />
+              <span>Call ended · {endNote}</span>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- SMS mode: simulated text thread ---------- */
+
+function SmsMode({
+  lines,
+  revealed,
+  playing,
+  finished,
+  onStart,
+  first,
+}: {
+  lines: SmsLine[];
+  revealed: number;
+  playing: boolean;
+  finished: boolean;
+  onStart: () => void;
+  first: string;
+}) {
+  return (
+    <div className="mt-5 flex flex-1 flex-col">
+      {!playing ? (
+        <div className="flex flex-1 flex-col items-center justify-center text-center">
+          <span
+            className="flex h-12 w-12 items-center justify-center rounded-full"
+            style={{ backgroundColor: "rgba(77,159,255,0.14)", color: ACCENT }}
+          >
+            <IconSms />
+          </span>
+          <p className="mt-4 max-w-[16rem] text-[13.5px] text-white/45">
+            See how the agent texts {first} and shares a one-tap Google review
+            link.
+          </p>
+          <button
+            type="button"
+            onClick={onStart}
+            className="mt-5 rounded-full px-6 py-3 text-[14px] font-semibold transition-transform hover:scale-[1.02]"
+            style={{ backgroundColor: ACCENT, color: CANVAS }}
+          >
+            Start SMS conversation
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-2.5">
+          {lines.slice(0, revealed).map((l, i) =>
+            l.cta ? (
+              <div key={i} className="l3-msg flex justify-start">
+                <span
+                  className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-[13px] font-semibold"
+                  style={{ backgroundColor: ACCENT, color: CANVAS }}
+                >
+                  <IconStar />
+                  {l.text}
+                </span>
+              </div>
+            ) : (
+              <Bubble key={i} side={l.side} animate>
+                {l.text}
+              </Bubble>
+            ),
+          )}
+          {!finished && (
+            <div className="flex items-center gap-1.5 px-1 pt-1">
+              <Typing />
+            </div>
+          )}
+          {finished && (
+            <button
+              type="button"
+              onClick={onStart}
+              className="mt-2 text-[12.5px] font-medium"
+              style={{ color: ACCENT_SOFT }}
+            >
+              Replay conversation
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- Aurora call orb (modeled on a voice-agent UI) ---------- */
+
+function CallOrb({
+  active,
+  label,
+  onClick,
+}: {
+  active: boolean;
+  label: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="relative flex h-52 w-52 items-center justify-center sm:h-56 sm:w-56">
+      {/* Pulsing halo while on a call */}
+      {active && (
+        <span
+          className="absolute inset-0 animate-ping rounded-full"
+          style={{ backgroundColor: "rgba(77,159,255,0.18)" }}
+        />
+      )}
+      {/* The sphere */}
+      <div
+        className="l3-orb absolute inset-0 rounded-full"
+        style={{
+          background: `
+            radial-gradient(circle at 32% 30%, #6fe0c8 0%, transparent 46%),
+            radial-gradient(circle at 70% 32%, #4D9FFF 0%, transparent 50%),
+            radial-gradient(circle at 66% 72%, #A9CEFF 0%, transparent 48%),
+            radial-gradient(circle at 30% 70%, #2f8f7c 0%, transparent 50%),
+            radial-gradient(circle at 50% 50%, #1c3a5e 0%, #14233b 100%)
+          `,
+          boxShadow:
+            "inset 0 0 50px rgba(255,255,255,0.15), 0 30px 80px -30px rgba(77,159,255,0.6)",
+        }}
+      />
+      {/* Center action button */}
+      <button
+        type="button"
+        onClick={onClick}
+        className="relative z-10 inline-flex items-center gap-2 rounded-full bg-white px-4 py-2.5 text-[14px] font-semibold text-[#0b0b0b] shadow-lg transition-transform hover:scale-[1.04]"
+      >
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-black text-white">
+          <IconWaveform />
+        </span>
+        {label}
+      </button>
+    </div>
   );
 }
 
@@ -784,22 +968,16 @@ function Capture() {
       body: "Outbound calls are transcribed automatically — the customer's exact words, ready to quote.",
       icon: <IconMic />,
     },
-    {
-      tag: "Video",
-      title: "On-camera moments",
-      body: "When customers join a meeting, the agent captures short video testimonials you can repurpose.",
-      icon: <IconVideo />,
-    },
   ];
   return (
     <section className="relative z-10 px-6 py-16">
       <div ref={ref} data-revealed="false" className="l3-reveal mx-auto max-w-5xl">
         <SectionHeading
           kicker="Capture"
-          title="Text, audio, and video — all collected for you"
-          sub="However the customer answers, the agent captures it and turns it into something you can publish."
+          title="Text and audio — all collected for you"
+          sub="However the customer answers — a text reply or a few words on a call — the agent captures it and turns it into something you can publish."
         />
-        <div className="mt-12 grid gap-5 md:grid-cols-3">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2">
           {modes.map((m) => (
             <div
               key={m.tag}
@@ -1237,9 +1415,9 @@ function Pricing() {
           </h3>
           <ul className="mt-6 grid gap-3 sm:grid-cols-2">
             {[
-              "Multi-channel outreach (SMS, email, call)",
-              "Meeting booking & capture",
-              "Text, audio & video collection",
+              "SMS & email review outreach",
+              "Outbound calls + SMS review links",
+              "Text & audio answer capture",
               "Posts + video generation",
               "Google Maps publishing",
               "Reputation ranking & insights",
@@ -1555,15 +1733,6 @@ function IconSms() {
   );
 }
 
-function IconMail() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="5" width="18" height="14" rx="2" />
-      <path d="M3 7l9 6 9-6" />
-    </svg>
-  );
-}
-
 function IconPhone() {
   return (
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -1572,11 +1741,18 @@ function IconPhone() {
   );
 }
 
-function IconCalendar() {
+function IconWaveform() {
   return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="4" width="18" height="18" rx="2" />
-      <path d="M16 2v4M8 2v4M3 10h18" />
+    <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4" />
+    </svg>
+  );
+}
+
+function IconStar() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-4 w-4" fill="currentColor">
+      <path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.8 5.9 21.4l1.4-6.8L2.2 9.9l6.9-.8z" />
     </svg>
   );
 }
@@ -1594,23 +1770,6 @@ function IconMic() {
     <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <rect x="9" y="2" width="6" height="12" rx="3" />
       <path d="M5 10a7 7 0 0 0 14 0M12 17v4" />
-    </svg>
-  );
-}
-
-function IconVideo() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="2" y="6" width="14" height="12" rx="2" />
-      <path d="M22 8l-6 4 6 4z" />
-    </svg>
-  );
-}
-
-function IconSpark() {
-  return (
-    <svg viewBox="0 0 24 24" className="h-5 w-5" fill="currentColor">
-      <path d="M12 2l1.8 5.6L19.5 9l-5.7 1.4L12 16l-1.8-5.6L4.5 9l5.7-1.4L12 2z" />
     </svg>
   );
 }
