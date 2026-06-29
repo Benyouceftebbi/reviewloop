@@ -291,6 +291,104 @@ export function GoogleSnippet({ data, brand }: TemplateProps) {
   );
 }
 
+/** 600×440 — Google review with an owner response the agent drafts. */
+export function GoogleResponse({ data, brand }: TemplateProps) {
+  const firstName = (data.name || "there").trim().split(" ")[0];
+  const onPrimary = readableOn(brand.colors.primary);
+  return (
+    <div
+      style={{
+        width: 600,
+        height: 440,
+        background: "#ffffff",
+        padding: 30,
+        display: "flex",
+        flexDirection: "column",
+        fontFamily: F.roboto,
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: 13 }}>
+        <InitialAvatar name={data.name} size={44} />
+        <div>
+          <div style={{ fontSize: 15.5, fontWeight: 500, color: "#202124" }}>
+            {data.name}
+          </div>
+          <div style={{ fontSize: 13, color: "#5f6368", marginTop: 2 }}>
+            Local Guide · {data.date}
+          </div>
+        </div>
+        <div style={{ flex: 1 }} />
+        <GoogleG size={22} />
+      </div>
+
+      <div style={{ marginTop: 14 }}>
+        <Stars value={data.stars} size={18} color={G_STAR} empty="#dadce0" gap={2} />
+      </div>
+
+      <Clamp
+        lines={3}
+        style={{ fontSize: 14.5, lineHeight: 1.5, color: "#3c4043", marginTop: 10 }}
+      >
+        {data.review}
+      </Clamp>
+
+      {/* Owner response — drafted automatically by the agent */}
+      <div
+        style={{
+          marginTop: 16,
+          background: "#f8f9fa",
+          borderRadius: 12,
+          padding: 16,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div
+            style={{
+              width: 30,
+              height: 30,
+              borderRadius: 8,
+              background: brand.colors.primary,
+              color: onPrimary,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 14,
+              fontWeight: 700,
+            }}
+          >
+            {(brand.brandName || "B").charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <div style={{ fontSize: 13.5, fontWeight: 500, color: "#202124" }}>
+              Response from the owner
+            </div>
+            <div style={{ fontSize: 12, color: "#5f6368" }}>{brand.brandName}</div>
+          </div>
+        </div>
+        <Clamp
+          lines={2}
+          style={{ fontSize: 13.5, lineHeight: 1.5, color: "#3c4043", marginTop: 10 }}
+        >
+          {`Thank you so much, ${firstName}! It means the world to us. We can't wait to welcome you back to ${brand.brandName}.`}
+        </Clamp>
+      </div>
+
+      <div style={{ flex: 1 }} />
+
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <ThumbUpIcon size={16} />
+        <span style={{ fontSize: 13, color: "#5f6368" }}>Helpful</span>
+        <div style={{ flex: 1 }} />
+        <span style={{ fontSize: 13, color: "#5f6368" }}>Posted on</span>
+        <GoogleG size={16} />
+        <span style={{ fontSize: 13.5, fontWeight: 500, color: "#5f6368" }}>
+          Google
+        </span>
+      </div>
+    </div>
+  );
+}
+
 /** 540×540 — Google Maps rating summary with bars + featured review. */
 export function RatingBreakdown({ data, brand }: TemplateProps) {
   const barWidth = (star: number) => {
@@ -749,6 +847,7 @@ export interface TemplateEntry {
 
 export const TEMPLATES: TemplateEntry[] = [
   { id: "snippet", name: "Maps Snippet", w: 600, h: 360, Component: GoogleSnippet },
+  { id: "response", name: "Owner Response", w: 600, h: 440, Component: GoogleResponse },
   { id: "breakdown", name: "Rating Breakdown", w: 540, h: 540, Component: RatingBreakdown },
   { id: "frame", name: "Four-Color Frame", w: 540, h: 540, Component: FourColorFrame },
   { id: "wall", name: "Wall of Proof", w: 600, h: 340, Component: WallOfProof },
